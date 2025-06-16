@@ -1,4 +1,3 @@
-// ייבוא ספריית Gemini AI. קו זה חייב להיות הראשון בקובץ.
 import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
 
 // 🎭 הודעות פתיחה
