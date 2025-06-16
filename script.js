@@ -695,4 +695,4 @@ function analyzeAndFindMovies(movies) {
   conversationMemory.lastRecommendations = filtered;
 
   console.log("🎯 סה״כ סרטים שנמצאו:", filtered.length);
-  console.log("🏆 סרטים סופיים:", filtered.map(m => `${m.
+console.log("🏆 סרטים סופיים:", filtered.map(m => `${m.Title} (${m.Release_Year})`).join(", "));
