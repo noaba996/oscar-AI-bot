@@ -120,9 +120,6 @@ const backupMovies = [
   }
 ];
 
-// *** חשוב: מפתח ה-API שלך נחשף בקוד צד לקוח. זוהי סכנת אבטחה!
-// *** עבור סביבת ייצור, מומלץ בחום להשתמש בשרת ביניים (Backend Proxy)
-// *** שיטפל בקריאות ל-Gemini API.
 const API_KEY = "AIzaSyAq-ngUJxyiZM2zkKyyv2yq2b5KsDx5c1M"; // המפתח שלך
 const model = new GoogleGenerativeAI(API_KEY).getGenerativeModel({ model: "gemini-pro" });
 
