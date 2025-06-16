@@ -26,7 +26,7 @@ const backupMovies = [
     Release_Year: 2023,
     Genres: "Action, Drama",
     Rating: "8.5",
-    ageRange: "17+", // Changed for consistency with Gemini's typical output
+    ageRange: "17+",
     "נטפליקס": 1,
     "יס": 0,
     "הוט": 1,
@@ -38,7 +38,7 @@ const backupMovies = [
     Release_Year: 2022,
     Genres: "Comedy, Romance",
     Rating: "7.8",
-    ageRange: "13+", // Changed for consistency
+    ageRange: "13+",
     "נטפליקס": 1,
     "יס": 1,
     "הוט": 0,
@@ -50,7 +50,7 @@ const backupMovies = [
     Release_Year: 2019,
     Genres: "Action, Adventure, Sci-Fi",
     Rating: "6.5",
-    ageRange: "13+", // Changed for consistency
+    ageRange: "13+",
     "נטפליקס": 1,
     "יס": 1,
     "הוט": 1,
@@ -62,7 +62,7 @@ const backupMovies = [
     Release_Year: 2019,
     Genres: "Drama, Thriller",
     Rating: "8.4",
-    ageRange: "17+", // Changed for consistency
+    ageRange: "17+",
     "נטפליקס": 1,
     "יס": 1,
     "הוט": 0,
@@ -133,15 +133,15 @@ async function loadMoviesDatabase() {
     console.log("📚 מנסה לטעון את מאגר הסרטים...");
     const response = await fetch('movies.json'); // ודא ש-movies.json נמצא באותה תיקייה
     if (!response.ok) {
-      throw new Error(`Failed to load movies: ${response.status} ${response.statusText}`);
+      throw new Error(`Failed to load movies: ${response.status} ${response.statusText}`); // <-- תיקון כאן!
     }
     moviesDatabase = await response.json();
-    console.log(`✅ נטענו ${moviesDatabase.length} סרטים מהמאגר המקומי`);
+    console.log(`✅ נטענו ${moviesDatabase.length} סרטים מהמאגר המקומי`); // <-- תיקון כאן!
     console.log("📊 דוגמה לסרט:", moviesDatabase[0]);
     return moviesDatabase;
   } catch (error) {
     console.error("❌ שגיאה בטעינת הסרטים:", error);
-    console.log("⚠️ משתמש במאגר סרטים זמני");
+    console.log("⚠ משתמש במאגר סרטים זמני");
     moviesDatabase = backupMovies;
     return moviesDatabase;
   }
@@ -215,16 +215,16 @@ async function analyzeText(text) {
     אם המשתמש אומר "לא רוצה" או "בלי" משהו ספציפי (למשל, ז'אנר), רשום זאת ברשימה נפרדת.
     אם המשתמש שואל שאלה שלא קשורה להמלצות סרטים (כמו "מה שלומך?"), השב ברוחב לב והתמקד בחזרה להמלצות סרטים.
 
-    1. **ז'אנרים מבוקשים (genres)**: רשימת ז'אנרים. השתמש בשמות ז'אנרים מוכרים באנגלית כמו "Action", "Comedy", "Drama", "Sci-Fi", "Fantasy", "Animation", "Thriller", "Horror", "Romance", "Adventure", "Crime", "Mystery", "Family", "Biography", "History", "Documentary", "Musical", "Western", "War", "Sport". אם המשתמש אומר ז'אנר בעברית, המר אותו לפורמט האנגלי המקובל.
-    2. **ז'אנרים להוציא (excludeGenres)**: רשימת ז'אנרים שהמשתמש לא רוצה.
-    3. **מצב רוח (moods)**: מצב הרוח של המשתמש (לדוגמה: שמח, עצוב, מרומם, רגוע, מרגש, מפחיד, רומנטי, נוסטלגי, מעורר השראה, משעשע, משועמם, עייף).
-    4. **פלטפורמות צפייה (platforms)**: רשימת פלטפורמות (לדוגמה: נטפליקס, יס, הוט).
-    5. **טווח גילאים (ageRange)**: טווח גילאים מומלץ לסרט (אחד מהבאים: "7+", "13+", "17+", "All Ages"). אם המשתמש מציין גיל ספציפי (למשל: "אני בן 10", "לגיל 15"), תרגם זאת לטווח המתאים. אם המשתמש אומר "לילדים", פרש כ-"7+". אם המשתמש אומר "לנוער", פרש כ-"13+". אם המשתמש אומר "למבוגרים", פרש כ-"17+".
-    6. **אורך סרט (duration)**: העדפת אורך הסרט (אחד מהבאים: "קצר" - עד 90 דקות, "בינוני" - 91-120 דקות, "ארוך" - מעל 120 דקות).
-    7. **שחקנים מועדפים (actors)**: רשימת שחקנים שהוזכרו.
-    8. **במאים מועדפים (directors)**: רשימת במאים שהוזכרו.
-    9. **פקודה (command)**: אם המשתמש מבקש "עוד", "נוספים", "תודה" או "סיום שיחה" / "ביי" / "להתראות". השתמש בערכים: "אחרים", "תודה", "סיום", "איפוס" (אם המשתמש רוצה להתחיל שיחה חדשה, "אפס", "התחל מחדש"). אם זו שאלה לא רלוונטית, השאר null.
-    10. **האם יש צורך בתגובה כללית (generalResponseNeeded)**: בוליאני. נכון אם השאלה אינה דורשת חילוץ נתונים אלא תגובה כללית כמו ברכה, פרידה או שאלה כללית שלא קשורה להמלצות.
+    1. *ז'אנרים מבוקשים (genres)*: רשימת ז'אנרים. השתמש בשמות ז'אנרים מוכרים באנגלית כמו "Action", "Comedy", "Drama", "Sci-Fi", "Fantasy", "Animation", "Thriller", "Horror", "Romance", "Adventure", "Crime", "Mystery", "Family", "Biography", "History", "Documentary", "Musical", "Western", "War", "Sport". אם המשתמש אומר ז'אנר בעברית, המר אותו לפורמט האנגלי המקובל.
+    2. *ז'אנרים להוציא (excludeGenres)*: רשימת ז'אנרים שהמשתמש לא רוצה.
+    3. *מצב רוח (moods)*: מצב הרוח של המשתמש (לדוגמה: שמח, עצוב, מרומם, רגוע, מרגש, מפחיד, רומנטי, נוסטלגי, מעורר השראה, משעשע, משועמם, עייף).
+    4. *פלטפורמות צפייה (platforms)*: רשימת פלטפורמות (לדוגמה: נטפליקס, יס, הוט).
+    5. *טווח גילאים (ageRange)*: טווח גילאים מומלץ לסרט (אחד מהבאים: "7+", "13+", "17+", "All Ages"). אם המשתמש מציין גיל ספציפי (למשל: "אני בן 10", "לגיל 15"), תרגם זאת לטווח המתאים. אם המשתמש אומר "לילדים", פרש כ-"7+". אם המשתמש אומר "לנוער", פרש כ-"13+". אם המשתמש אומר "למבוגרים", פרש כ-"17+".
+    6. *אורך סרט (duration)*: העדפת אורך הסרט (אחד מהבאים: "קצר" - עד 90 דקות, "בינוני" - 91-120 דקות, "ארוך" - מעל 120 דקות).
+    7. *שחקנים מועדפים (actors)*: רשימת שחקנים שהוזכרו.
+    8. *במאים מועדפים (directors)*: רשימת במאים שהוזכרו.
+    9. *פקודה (command)*: אם המשתמש מבקש "עוד", "נוספים", "תודה" או "סיום שיחה" / "ביי" / "להתראות". השתמש בערכים: "אחרים", "תודה", "סיום", "איפוס" (אם המשתמש רוצה להתחיל שיחה חדשה, "אפס", "התחל מחדש"). אם זו שאלה לא רלוונטית, השאר null.
+    10. *האם יש צורך בתגובה כללית (generalResponseNeeded)*: בוליאני. נכון אם השאלה אינה דורשת חילוץ נתונים אלא תגובה כללית כמו ברכה, פרידה או שאלה כללית שלא קשורה להמלצות.
 
     אנא החזר את המידע בפורמט JSON קריא, עם השדות הבאים. אם אינך מוצא מידע עבור שדה מסוים, השאר אותו ריק, null, או array ריק כפי שצוין.
     {
@@ -250,7 +250,7 @@ async function analyzeText(text) {
 
     console.log("Gemini Raw Response Text:", textResponse);
 
-    // ניסיון לפרסר JSON. Gemini עשוי לפעמים לכלול תגי קוד (```json).
+    // ניסיון לפרסר JSON. Gemini עשוי לפעמים לכלול תגי קוד (json).
     let jsonString = textResponse.trim();
     if (jsonString.startsWith('```json')) {
       jsonString = jsonString.substring(7);
@@ -276,7 +276,7 @@ async function analyzeText(text) {
       actors: [],
       directors: [],
       command: null,
-      generalResponseNeeded: false // ברירת מחדל שלא נזקק לתגובה כללית
+      generalResponseNeeded: false
     };
   }
 }
@@ -344,7 +344,7 @@ async function generateSmartResponse(message, movies) {
         if (nextQ) {
             return `אני בוט להמלצות סרטים! אשמח לעזור לך למצוא משהו. ${nextQ.question}`;
         }
-        return `אני כאן כדי למצוא לך את הסרט המושלם. ספר לי מה תרצה לראות!`;
+        return "אני כאן כדי למצוא לך את הסרט המושלם. ספר לי מה תרצה לראות!";
     }
   }
 
@@ -695,3 +695,111 @@ function analyzeAndFindMovies(movies) {
 
   console.log("🎯 סה״כ סרטים שנמצאו:", filtered.length);
   console.log("🏆 סרטים סופיים:", filtered.map(m => `${m.Title} (${m.Release_Year})`).join(", "));
+  return filtered; // חשוב להחזיר את הרשימה המסוננת
+}
+
+
+// --- פונקציות לתצוגה וניהול ה-UI (הותאמו לשינויים) ---
+
+// פונקציה להוספת הודעה לצא'ט
+function addMessage(sender, message) {
+  const chatMessages = document.getElementById('chat-messages');
+  const messageElement = document.createElement('div');
+  messageElement.classList.add('message', sender);
+  messageElement.innerHTML = message;
+  chatMessages.appendChild(messageElement);
+  chatMessages.scrollTop = chatMessages.scrollHeight; // גלילה אוטומטית למטה
+}
+
+// פונקציה לניקוי השיחה
+function clearConversation(userMessage = null) {
+  document.getElementById('chat-messages').innerHTML = ''; // מנקה את כל ההודעות
+  conversationMemory = { // מאפס את זיכרון השיחה
+    lastGenres: [],
+    excludeGenres: [],
+    lastMoods: [],
+    lastPlatforms: [],
+    lastRecommendations: [],
+    lastQuestion: null,
+    userPreferences: {
+      age: null,
+      duration: null,
+      favoriteActors: [],
+      favoriteDirectors: []
+    },
+    conversationState: "collecting_info",
+    collectedInfo: {
+      genres: false,
+      age: false,
+      mood: false,
+      duration: false,
+      platforms: false
+    },
+    recommendationOffset: 0
+  };
+  if (userMessage && userMessage.toLowerCase().includes("איפוס")) {
+    addMessage('bot', `בטח, בוא נתחיל מחדש! ${welcomeMessages[0]}`); // הודעת פתיחה אחרי איפוס
+  } else {
+    // מציג הודעת פתיחה רק פעם אחת בטעינה ראשונית של הדף
+    // או לאחר איפוס יזום שלא דרך פקודת "איפוס"
+    // אבל בדרך כלל welcome message מוצגת כבר ב-DOMContentLoaded
+  }
+}
+
+
+// פונקציה לעיצוב המלצת סרט
+function formatMovieRecommendation(movie) {
+  let details = `<b>${movie.Title}</b> (${movie.Release_Year})<br>`;
+  if (movie.Director) details += `<b>במאי:</b> ${movie.Director}<br>`;
+  if (movie.Stars) details += `<b>שחקנים:</b> ${movie.Stars}<br>`;
+  if (movie.Genres) details += `<b>ז'אנר:</b> ${movie.Genres}<br>`;
+  if (movie.Rating) details += `<b>דירוג:</b> ${movie.Rating}/10<br>`;
+  if (movie.ageRange) details += `<b>גיל מומלץ:</b> ${movie.ageRange}<br>`;
+  if (movie.Duration) {
+    let durationText = '';
+    if (movie.Duration <= 90) durationText = 'קצר (עד 90 דקות)';
+    else if (movie.Duration <= 120) durationText = 'בינוני (91-120 דקות)';
+    else durationText = 'ארוך (מעל 120 דקות)';
+    details += `<b>אורך:</b> ${movie.Duration} דקות (${durationText})<br>`;
+  }
+  let platforms = [];
+  if (movie["נטפליקס"] === 1) platforms.push("נטפליקס");
+  if (movie["יס"] === 1) platforms.push("יס");
+  if (movie["הוט"] === 1) platforms.push("הוט");
+  if (platforms.length > 0) {
+    details += `<b>זמין ב:</b> ${platforms.join(", ")}<br>`;
+  } else {
+    details += `<b>זמין ב:</b> לא ידוע<br>`;
+  }
+  if (movie.trailer) details += `<a href="${movie.trailer}" target="_blank">צפה בטריילר</a>`;
+  return details;
+}
+
+
+// --- טיפול באירועי UI ---
+
+document.addEventListener('DOMContentLoaded', async () => {
+  console.log("DOM Loaded. Initializing bot...");
+  addMessage('bot', welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)]);
+  await loadMoviesDatabase(); // טוען את מאגר הסרטים בטעינת הדף
+});
+
+document.getElementById('send-button').addEventListener('click', async () => {
+  const userInput = document.getElementById('user-input');
+  const message = userInput.value.trim();
+
+  if (message) {
+    addMessage('user', message);
+    userInput.value = ''; // נקה את תיבת הקלט
+
+    const movies = await loadMoviesDatabase(); // ודא שהמאגר טעון
+    const botResponse = await generateSmartResponse(message, movies);
+    addMessage('bot', botResponse);
+  }
+});
+
+document.getElementById('user-input').addEventListener('keypress', function(event) {
+  if (event.key === 'Enter') {
+    document.getElementById('send-button').click();
+  }
+});
