@@ -133,10 +133,12 @@ async function loadMoviesDatabase() {
     console.log("📚 מנסה לטעון את מאגר הסרטים...");
     const response = await fetch('movies.json'); // ודא ש-movies.json נמצא באותה תיקייה
     if (!response.ok) {
-      throw new Error(`Failed to load movies: ${response.status} ${response.statusText}`); // <-- תיקון כאן!
+      // תיקון: ודא שימוש בגרשיים הפוכים (backticks) עבור template literals
+      throw new Error(`Failed to load movies: ${response.status} ${response.statusText}`);
     }
     moviesDatabase = await response.json();
-    console.log(`✅ נטענו ${moviesDatabase.length} סרטים מהמאגר המקומי`); // <-- תיקון כאן!
+    // תיקון: ודא שימוש בגרשיים הפוכים (backticks) עבור template literals
+    console.log(`✅ נטענו ${moviesDatabase.length} סרטים מהמאגר המקומי`);
     console.log("📊 דוגמה לסרט:", moviesDatabase[0]);
     return moviesDatabase;
   } catch (error) {
@@ -208,6 +210,7 @@ const interactiveQuestions = [
 
 // --- פונקציה עיקרית לניתוח טקסט באמצעות Gemini ---
 async function analyzeText(text) {
+  // תיקון: ודא שימוש בגרשיים הפוכים (backticks) עבור template literals
   const prompt = `
     אתה אוסקר, בוט המלצות סרטים. המשתמש אמר: "${text}".
     אנא חלץ מתוך הטקסט את הפרטים הבאים. היה גמיש בהבנת כוונת המשתמש, גם עם שגיאות כתיב או ניסוחים לא ברורים.
@@ -252,6 +255,7 @@ async function analyzeText(text) {
 
     // ניסיון לפרסר JSON. Gemini עשוי לפעמים לכלול תגי קוד (json).
     let jsonString = textResponse.trim();
+    // תיקון: ודא התאמה מדויקת של הסוגריים הפוכים (backticks) וגרשיים
     if (jsonString.startsWith('```json')) {
       jsonString = jsonString.substring(7);
     }
@@ -333,6 +337,7 @@ async function generateSmartResponse(message, movies) {
     if (genericGreetings.some(g => lowerMessage.includes(g))) {
         // אם זו ברכה, תן ברכה חזרה ואז שאל את השאלה הבאה
         const randomWelcome = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
+        // תיקון: ודא שימוש בגרשיים הפוכים (backticks) עבור template literals
         const nextQ = getNextQuestion();
         if (nextQ) {
             return `היי גם לך! ${randomWelcome.replace("שלום! אני אוסקר, בוט המלצות הסרטים שלך 🎬 ", "")} ${nextQ.question}`;
@@ -342,6 +347,7 @@ async function generateSmartResponse(message, movies) {
         // אם זו שאלה כללית אחרת, נתמקד מחדש
         const nextQ = getNextQuestion();
         if (nextQ) {
+            // תיקון: ודא שימוש בגרשיים הפוכים (backticks) עבור template literals
             return `אני בוט להמלצות סרטים! אשמח לעזור לך למצוא משהו. ${nextQ.question}`;
         }
         return "אני כאן כדי למצוא לך את הסרט המושלם. ספר לי מה תרצה לראות!";
@@ -413,6 +419,7 @@ async function generateSmartResponse(message, movies) {
       response += "<br><br>הנה כמה המלצות בשבילך:<br><br>";
 
       moviesToRecommend.forEach((movie, index) => {
+        // תיקון: ודא שימוש בגרשיים הפוכים (backticks) עבור template literals
         response += `${index + 1}. ${formatMovieRecommendation(movie)}<br><br>`;
       });
 
@@ -471,6 +478,7 @@ async function generateSmartResponse(message, movies) {
 
       const nextQuestion = getNextQuestion();
       if (nextQuestion) {
+        // תיקון: ודא שימוש בגרשיים הפוכים (backticks) עבור template literals
         response += ` אולי ננסה שוב? ${nextQuestion.question}`;
         conversationMemory.lastQuestion = nextQuestion.id;
       } else {
@@ -491,6 +499,7 @@ async function generateSmartResponse(message, movies) {
 
     if (providedInfo.length > 0 || (analysis.moods && analysis.moods.length > 0)) {
         if (providedInfo.length > 0) {
+            // תיקון: ודא שימוש בגרשיים הפוכים (backticks) עבור template literals
             response += `תודה על המידע שסיפקת בנוגע ל${providedInfo.join(' ו-')}.`;
         }
         if (analysis.moods && analysis.moods.length > 0) {
@@ -505,6 +514,7 @@ async function generateSmartResponse(message, movies) {
 
 
     if (nextQuestion) {
+      // תיקון: ודא שימוש בגרשיים הפוכים (backticks) עבור template literals
       response += `${nextQuestion.question}`;
       conversationMemory.lastQuestion = nextQuestion.id;
     } else {
@@ -650,6 +660,7 @@ function analyzeAndFindMovies(movies) {
         isMatch = (movieAgeRange === "All Ages" || movieAgeRange === "7+" || movieAgeRange === "13+" || movieAgeRange === "17+");
       }
 
+      // תיקון: ודא שימוש בגרשיים הפוכים (backticks) עבור template literals
       console.log(`Debug: Checking movie '${movie.Title}' (age: ${movie.ageRange}) against user preference '${conversationMemory.userPreferences.age}'. Match: ${isMatch}`);
       return isMatch;
     });
@@ -693,6 +704,7 @@ function analyzeAndFindMovies(movies) {
   // שמירת ההמלצות בזיכרון
   conversationMemory.lastRecommendations = filtered;
 
+  // תיקון: ודא שימוש בגרשיים הפוכים (backticks) עבור template literals
   console.log("🎯 סה״כ סרטים שנמצאו:", filtered.length);
   console.log("🏆 סרטים סופיים:", filtered.map(m => `${m.Title} (${m.Release_Year})`).join(", "));
   return filtered; // חשוב להחזיר את הרשימה המסוננת
@@ -703,17 +715,30 @@ function analyzeAndFindMovies(movies) {
 
 // פונקציה להוספת הודעה לצא'ט
 function addMessage(sender, message) {
-  const chatMessages = document.getElementById('chat-messages');
+  // תיקון ID: מ- 'chat-messages' ל- 'conversation'
+  const chatMessages = document.getElementById('conversation');
   const messageElement = document.createElement('div');
-  messageElement.classList.add('message', sender);
-  messageElement.innerHTML = message;
+  // ה-HTML שלך משתמש ב-classes 'user' ו-'bot' וכן 'bubble'
+  messageElement.classList.add('bubble', sender);
+  // הוספת האווטאר עבור הודעות הבוט
+  if (sender === 'bot') {
+    messageElement.innerHTML = `
+      <img src="https://example.com/oscar-avatar.png" alt="Oscar Avatar" class="bot-avatar">
+      <div class="bot-message">${message}</div>
+    `;
+    // מומלץ להחליף את ה-URL של התמונה לכתובת אמיתית של תמונת אווטאר של הבוט
+  } else {
+    messageElement.innerHTML = message;
+  }
+  
   chatMessages.appendChild(messageElement);
   chatMessages.scrollTop = chatMessages.scrollHeight; // גלילה אוטומטית למטה
 }
 
 // פונקציה לניקוי השיחה
 function clearConversation(userMessage = null) {
-  document.getElementById('chat-messages').innerHTML = ''; // מנקה את כל ההודעות
+  // תיקון ID: מ- 'chat-messages' ל- 'conversation'
+  document.getElementById('conversation').innerHTML = ''; // מנקה את כל ההודעות
   conversationMemory = { // מאפס את זיכרון השיחה
     lastGenres: [],
     excludeGenres: [],
@@ -738,17 +763,21 @@ function clearConversation(userMessage = null) {
     recommendationOffset: 0
   };
   if (userMessage && userMessage.toLowerCase().includes("איפוס")) {
+    // תיקון: ודא שימוש בגרשיים הפוכים (backticks) עבור template literals
     addMessage('bot', `בטח, בוא נתחיל מחדש! ${welcomeMessages[0]}`); // הודעת פתיחה אחרי איפוס
   } else {
     // מציג הודעת פתיחה רק פעם אחת בטעינה ראשונית של הדף
     // או לאחר איפוס יזום שלא דרך פקודת "איפוס"
     // אבל בדרך כלל welcome message מוצגת כבר ב-DOMContentLoaded
+    // הוספת הודעת הפתיחה כדי שתמיד תופיע לאחר לחיצה על "התחל שיחה חדשה"
+    addMessage('bot', welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)]);
   }
 }
 
 
 // פונקציה לעיצוב המלצת סרט
 function formatMovieRecommendation(movie) {
+  // תיקון: ודא שימוש בגרשיים הפוכים (backticks) עבור template literals
   let details = `<b>${movie.Title}</b> (${movie.Release_Year})<br>`;
   if (movie.Director) details += `<b>במאי:</b> ${movie.Director}<br>`;
   if (movie.Stars) details += `<b>שחקנים:</b> ${movie.Stars}<br>`;
@@ -771,6 +800,7 @@ function formatMovieRecommendation(movie) {
   } else {
     details += `<b>זמין ב:</b> לא ידוע<br>`;
   }
+  // תיקון: ודא שימוש בגרשיים הפוכים (backticks) עבור template literals
   if (movie.trailer) details += `<a href="${movie.trailer}" target="_blank">צפה בטריילר</a>`;
   return details;
 }
@@ -784,8 +814,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadMoviesDatabase(); // טוען את מאגר הסרטים בטעינת הדף
 });
 
-document.getElementById('send-button').addEventListener('click', async () => {
-  const userInput = document.getElementById('user-input');
+// תיקון ID: מ- 'send-button' ל- 'sendButton'
+document.getElementById('sendButton').addEventListener('click', async () => {
+  // תיקון ID: מ- 'user-input' ל- 'userInput'
+  const userInput = document.getElementById('userInput');
   const message = userInput.value.trim();
 
   if (message) {
@@ -798,8 +830,10 @@ document.getElementById('send-button').addEventListener('click', async () => {
   }
 });
 
-document.getElementById('user-input').addEventListener('keypress', function(event) {
+// תיקון ID: מ- 'user-input' ל- 'userInput'
+document.getElementById('userInput').addEventListener('keypress', function(event) {
   if (event.key === 'Enter') {
-    document.getElementById('send-button').click();
+    // תיקון ID: מ- 'send-button' ל- 'sendButton'
+    document.getElementById('sendButton').click();
   }
 });
