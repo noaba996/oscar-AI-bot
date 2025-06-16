@@ -1,3 +1,6 @@
+// ייבוא ספריית Gemini AI. קו זה חייב להיות הראשון בקובץ.
+import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
+
 // 🎭 הודעות פתיחה
 const welcomeMessages = [
   "שלום! אני אוסקר, בוט המלצות הסרטים שלך 🎬 איזה סרט מעניין אותך היום?",
@@ -5,7 +8,7 @@ const welcomeMessages = [
   "ברוכים הבאים! אני אוסקר ואשמח לעזור לך למצוא סרט מושלם 🎭 מה אתה מחפש?"
 ];
 
-// 📚 מאגר סרטים זמני (ישמש כגיבוי) - נשמר כפי שהיה, אך עשוי לדרוש התאמות קטנות אם יש חוסר התאמה בז'אנרים/טווח גילאים
+// 📚 מאגר סרטים זמני (ישמש כגיבוי)
 const backupMovies = [
   {
     Title: "המצאה מתוקה",
@@ -24,7 +27,7 @@ const backupMovies = [
     Release_Year: 2023,
     Genres: "Action, Drama",
     Rating: "8.5",
-    ageRange: "16+", // Changed from 16+ to 17+ for consistency with Gemini output range if needed
+    ageRange: "17+", // Changed for consistency with Gemini's typical output
     "נטפליקס": 1,
     "יס": 0,
     "הוט": 1,
@@ -36,7 +39,7 @@ const backupMovies = [
     Release_Year: 2022,
     Genres: "Comedy, Romance",
     Rating: "7.8",
-    ageRange: "12+", // Changed to 13+ for consistency with Gemini output range if needed
+    ageRange: "13+", // Changed for consistency
     "נטפליקס": 1,
     "יס": 1,
     "הוט": 0,
@@ -48,7 +51,7 @@ const backupMovies = [
     Release_Year: 2019,
     Genres: "Action, Adventure, Sci-Fi",
     Rating: "6.5",
-    ageRange: "12+", // Changed to 13+ for consistency with Gemini output range if needed
+    ageRange: "13+", // Changed for consistency
     "נטפליקס": 1,
     "יס": 1,
     "הוט": 1,
@@ -60,7 +63,7 @@ const backupMovies = [
     Release_Year: 2019,
     Genres: "Drama, Thriller",
     Rating: "8.4",
-    ageRange: "16+", // Changed to 17+ for consistency with Gemini output range if needed
+    ageRange: "17+", // Changed for consistency
     "נטפליקס": 1,
     "יס": 1,
     "הוט": 0,
@@ -117,14 +120,13 @@ const backupMovies = [
   }
 ];
 
-
-// Gemini API configuration
-// WARNING: Exposing API keys in client-side code is a security risk.
-// For production, use a backend proxy.
-const API_KEY = "AIzaSyAq-ngUJxyiZM2zkKyyv2yq2b5KsDx5c1M"; // Your API Key
+// *** חשוב: מפתח ה-API שלך נחשף בקוד צד לקוח. זוהי סכנת אבטחה!
+// *** עבור סביבת ייצור, מומלץ בחום להשתמש בשרת ביניים (Backend Proxy)
+// *** שיטפל בקריאות ל-Gemini API.
+const API_KEY = "AIzaSyAq-ngUJxyiZM2zkKyyv2yq2b5KsDx5c1M"; // המפתח שלך
 const model = new GoogleGenerativeAI(API_KEY).getGenerativeModel({ model: "gemini-pro" });
 
-// Function to load movie database
+// פונקציה לטעינת מאגר סרטים
 let moviesDatabase = null;
 
 async function loadMoviesDatabase() {
@@ -132,12 +134,10 @@ async function loadMoviesDatabase() {
 
   try {
     console.log("📚 מנסה לטעון את מאגר הסרטים...");
-    const response = await fetch('movies.json');
-
+    const response = await fetch('movies.json'); // ודא ש-movies.json נמצא באותה תיקייה
     if (!response.ok) {
       throw new Error(`Failed to load movies: ${response.status} ${response.statusText}`);
     }
-
     moviesDatabase = await response.json();
     console.log(`✅ נטענו ${moviesDatabase.length} סרטים מהמאגר המקומי`);
     console.log("📊 דוגמה לסרט:", moviesDatabase[0]);
@@ -150,9 +150,10 @@ async function loadMoviesDatabase() {
   }
 }
 
-// Conversation memory
+// עדכון זיכרון השיחה
 let conversationMemory = {
   lastGenres: [],
+  excludeGenres: [], // נוסף שדה לז'אנרים שצריך להוציא
   lastMoods: [],
   lastPlatforms: [],
   lastRecommendations: [],
@@ -167,7 +168,7 @@ let conversationMemory = {
   collectedInfo: {
     genres: false,
     age: false,
-    mood: false,
+    mood: false, // לא נאסף במפורש, אבל יכול להשפיע על המלצות
     duration: false,
     platforms: false
   },
@@ -188,6 +189,7 @@ const thankYouMessages = [
   "זה בדיוק למה אני כאן! 😄 חזור אליי מתי שתרצה המלצות חדשות! 🎬"
 ];
 
+// שאלות אינטראקטיביות (ללא מילות מפתח, Gemini מבין את הכוונה)
 const interactiveQuestions = [
   {
     id: "genres",
@@ -207,26 +209,25 @@ const interactiveQuestions = [
   }
 ];
 
-// --- Gemini Integration ---
-
-// Function to analyze text using Gemini
+// --- פונקציה עיקרית לניתוח טקסט באמצעות Gemini ---
 async function analyzeText(text) {
   const prompt = `
     אתה אוסקר, בוט המלצות סרטים. המשתמש אמר: "${text}".
     אנא חלץ מתוך הטקסט את הפרטים הבאים. היה גמיש בהבנת כוונת המשתמש, גם עם שגיאות כתיב או ניסוחים לא ברורים.
     אם המשתמש אומר משהו כמו "משהו שישמח אותי", נסה להסיק ז'אנר או מצב רוח מתאים (למשל: קומדיה, שמח).
-    אם המשתמש מבקש ללא מפורש ז'אנר, אך אומר משהו כמו "בא לי לראות משהו קליל", פרש זאת כקומדיה.
     אם המשתמש אומר "לא רוצה" או "בלי" משהו ספציפי (למשל, ז'אנר), רשום זאת ברשימה נפרדת.
+    אם המשתמש שואל שאלה שלא קשורה להמלצות סרטים (כמו "מה שלומך?"), השב ברוחב לב והתמקד בחזרה להמלצות סרטים.
 
-    1. **ז'אנרים מבוקשים (genres)**: רשימת ז'אנרים (לדוגמה: אקשן, קומדיה, דרמה). השתמש בשמות ז'אנרים מוכרים באנגלית כמו "Action", "Comedy", "Drama", "Sci-Fi", "Fantasy", "Animation", "Thriller", "Horror", "Romance", "Adventure", "Crime", "Mystery", "Family", "Biography", "History", "Documentary", "Musical", "Western", "War". אם המשתמש אומר ז'אנר בעברית, המר אותו לפורמט האנגלי המקובל.
+    1. **ז'אנרים מבוקשים (genres)**: רשימת ז'אנרים. השתמש בשמות ז'אנרים מוכרים באנגלית כמו "Action", "Comedy", "Drama", "Sci-Fi", "Fantasy", "Animation", "Thriller", "Horror", "Romance", "Adventure", "Crime", "Mystery", "Family", "Biography", "History", "Documentary", "Musical", "Western", "War", "Sport". אם המשתמש אומר ז'אנר בעברית, המר אותו לפורמט האנגלי המקובל.
     2. **ז'אנרים להוציא (excludeGenres)**: רשימת ז'אנרים שהמשתמש לא רוצה.
     3. **מצב רוח (moods)**: מצב הרוח של המשתמש (לדוגמה: שמח, עצוב, מרומם, רגוע, מרגש, מפחיד, רומנטי, נוסטלגי, מעורר השראה, משעשע, משועמם, עייף).
-    4. **פלטפורמות צפייה (platforms)**: רשימת פלטפורמות (לדוגמה: נטפליקס, יס, הוט). אם המשתמש אומר "לא בנטפליקס", זה אומר שהוא לא רוצה סרטים משם.
-    5. **טווח גילאים (ageRange)**: טווח גילאים מומלץ לסרט (אחד מהבאים: "7+", "13+", "17+"). אם המשתמש מציין גיל ספציפי (למשל: "אני בן 10", "לגיל 15"), תרגם זאת לטווח המתאים. אם המשתמש אומר "לילדים", פרש כ-"7+". אם המשתמש אומר "לנוער", פרש כ-"13+". אם המשתמש אומר "למבוגרים", פרש כ-"17+".
+    4. **פלטפורמות צפייה (platforms)**: רשימת פלטפורמות (לדוגמה: נטפליקס, יס, הוט).
+    5. **טווח גילאים (ageRange)**: טווח גילאים מומלץ לסרט (אחד מהבאים: "7+", "13+", "17+", "All Ages"). אם המשתמש מציין גיל ספציפי (למשל: "אני בן 10", "לגיל 15"), תרגם זאת לטווח המתאים. אם המשתמש אומר "לילדים", פרש כ-"7+". אם המשתמש אומר "לנוער", פרש כ-"13+". אם המשתמש אומר "למבוגרים", פרש כ-"17+".
     6. **אורך סרט (duration)**: העדפת אורך הסרט (אחד מהבאים: "קצר" - עד 90 דקות, "בינוני" - 91-120 דקות, "ארוך" - מעל 120 דקות).
     7. **שחקנים מועדפים (actors)**: רשימת שחקנים שהוזכרו.
     8. **במאים מועדפים (directors)**: רשימת במאים שהוזכרו.
-    9. **פקודה (command)**: אם המשתמש מבקש "עוד", "נוספים", "תודה" או "סיום שיחה" / "ביי" / "להתראות". השתמש בערכים: "אחרים", "תודה", "סיום". אם המשתמש רוצה לאפס את השיחה (למשל, "התחל מחדש"), השתמש בערך "איפוס".
+    9. **פקודה (command)**: אם המשתמש מבקש "עוד", "נוספים", "תודה" או "סיום שיחה" / "ביי" / "להתראות". השתמש בערכים: "אחרים", "תודה", "סיום", "איפוס" (אם המשתמש רוצה להתחיל שיחה חדשה, "אפס", "התחל מחדש"). אם זו שאלה לא רלוונטית, השאר null.
+    10. **האם יש צורך בתגובה כללית (generalResponseNeeded)**: בוליאני. נכון אם השאלה אינה דורשת חילוץ נתונים אלא תגובה כללית כמו ברכה, פרידה או שאלה כללית שלא קשורה להמלצות.
 
     אנא החזר את המידע בפורמט JSON קריא, עם השדות הבאים. אם אינך מוצא מידע עבור שדה מסוים, השאר אותו ריק, null, או array ריק כפי שצוין.
     {
@@ -238,7 +239,8 @@ async function analyzeText(text) {
       "duration": null,
       "actors": [],
       "directors": [],
-      "command": null
+      "command": null,
+      "generalResponseNeeded": false
     }
 
     חשוב: התשובה שלך צריכה להכיל אך ורק את אובייקט ה-JSON, ללא טקסט נוסף לפני או אחרי.
@@ -251,7 +253,7 @@ async function analyzeText(text) {
 
     console.log("Gemini Raw Response Text:", textResponse);
 
-    // Attempt to parse JSON. Gemini sometimes includes markdown fences (```json).
+    // ניסיון לפרסר JSON. Gemini עשוי לפעמים לכלול תגי קוד (```json).
     let jsonString = textResponse.trim();
     if (jsonString.startsWith('```json')) {
       jsonString = jsonString.substring(7);
@@ -265,9 +267,8 @@ async function analyzeText(text) {
     return analysis;
 
   } catch (error) {
-    console.error("❌ שגיאה בקריאה ל-Gemini API:", error);
-    showError("אופס! נראה שיש תקלה קלה במערכת. אנא נסה שוב מאוחר יותר. 🛠️");
-    // Return a default empty analysis in case of error
+    console.error("❌ שגיאה בקריאה ל-Gemini API או בפירסור JSON:", error);
+    // במקרה של שגיאה, נחזיר ניתוח ריק או ברירת מחדל כדי למנוע קריסה
     return {
       genres: [],
       excludeGenres: [],
@@ -277,12 +278,13 @@ async function analyzeText(text) {
       duration: null,
       actors: [],
       directors: [],
-      command: null
+      command: null,
+      generalResponseNeeded: false // ברירת מחדל שלא נזקק לתגובה כללית
     };
   }
 }
 
-// Function to get the next question
+// פונקציה לקבלת השאלה הבאה (לא השתנתה)
 function getNextQuestion() {
   const allInfoCollected = Object.values(conversationMemory.collectedInfo).every(info => info === true);
   if (allInfoCollected) {
@@ -300,15 +302,16 @@ function getNextQuestion() {
   return null;
 }
 
-// Function to generate a smart response based on Gemini's analysis
+// פונקציה ליצירת תשובה חכמה (הותאמה לעבודה עם analyzeText של Gemini)
 async function generateSmartResponse(message, movies) {
-  const analysis = await analyzeText(message); // Perform analysis using Gemini
+  const analysis = await analyzeText(message); // ניתוח ההודעה באמצעות Gemini
 
   let response = "";
 
-  console.log("Debug: generateSmartResponse - analysis from current message:", analysis);
+  console.log("Debug: generateSmartResponse - analysis from Gemini:", analysis);
   console.log("Debug: generateSmartResponse - conversationMemory before update:", { ...conversationMemory });
 
+  // טיפול בפקודות שהתגלו על ידי Gemini
   if (analysis.command === "תודה") {
     const randomThankYou = thankYouMessages[Math.floor(Math.random() * thankYouMessages.length)];
     return randomThankYou;
@@ -316,39 +319,41 @@ async function generateSmartResponse(message, movies) {
 
   if (analysis.command === "סיום") {
     const randomGoodbye = goodbyeMessages[Math.floor(Math.random() * goodbyeMessages.length)];
-    // Reset conversation
-    conversationMemory = {
-      lastGenres: [],
-      lastMoods: [],
-      lastPlatforms: [],
-      lastRecommendations: [],
-      lastQuestion: null,
-      userPreferences: {
-        age: null,
-        duration: null,
-        favoriteActors: [],
-        favoriteDirectors: []
-      },
-      conversationState: "collecting_info",
-      collectedInfo: {
-        genres: false,
-        age: false,
-        mood: false,
-        duration: false,
-        platforms: false
-      },
-      recommendationOffset: 0
-    };
+    clearConversation(); // איפוס השיחה
     return randomGoodbye;
   }
 
   if (analysis.command === "איפוס") {
-    clearConversation(message); // Calls clearConversation which also handles the welcome message
-    return; // clearConversation handles the response
+    clearConversation(message); // איפוס השיחה והצגת הודעת המשתמש
+    return ""; // clearConversation כבר מטפלת בתגובה הראשונית
   }
 
-  // Determine if it's a new genre request or "more" command
-  const isNewGenreRequest = analysis.genres.length > 0 &&
+  // טיפול בתגובות כלליות מ-Gemini (למשל, ברכות, שאלות לא קשורות)
+  if (analysis.generalResponseNeeded) {
+    const genericGreetings = ["שלום", "היי", "בוקר טוב", "ערב טוב", "מה נשמע", "מה שלומך"];
+    const lowerMessage = message.toLowerCase();
+
+    if (genericGreetings.some(g => lowerMessage.includes(g))) {
+        // אם זו ברכה, תן ברכה חזרה ואז שאל את השאלה הבאה
+        const randomWelcome = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
+        const nextQ = getNextQuestion();
+        if (nextQ) {
+            return `היי גם לך! ${randomWelcome.replace("שלום! אני אוסקר, בוט המלצות הסרטים שלך 🎬 ", "")} ${nextQ.question}`;
+        }
+        return randomWelcome;
+    } else {
+        // אם זו שאלה כללית אחרת, נתמקד מחדש
+        const nextQ = getNextQuestion();
+        if (nextQ) {
+            return `אני בוט להמלצות סרטים! אשמח לעזור לך למצוא משהו. ${nextQ.question}`;
+        }
+        return `אני כאן כדי למצוא לך את הסרט המושלם. ספר לי מה תרצה לראות!`;
+    }
+  }
+
+
+  // קביעה אם זו בקשת ז'אנר חדשה או פקודת "עוד"
+  const isNewGenreRequest = analysis.genres && analysis.genres.length > 0 &&
     (conversationMemory.lastGenres.length === 0 ||
       JSON.stringify(analysis.genres) !== JSON.stringify(conversationMemory.lastGenres));
 
@@ -360,18 +365,21 @@ async function generateSmartResponse(message, movies) {
     console.log("Debug: generateSmartResponse - 'Other' command detected, incrementing offset to:", conversationMemory.recommendationOffset);
   }
 
-  // Update conversation memory with Gemini's analysis
+  // עדכון זיכרון השיחה עם ניתוח Gemini
   if (analysis.genres && analysis.genres.length > 0) {
     conversationMemory.lastGenres = analysis.genres;
     conversationMemory.collectedInfo.genres = true;
   }
+  if (analysis.excludeGenres && analysis.excludeGenres.length > 0) {
+    conversationMemory.excludeGenres = analysis.excludeGenres;
+  }
   if (analysis.moods && analysis.moods.length > 0) {
     conversationMemory.lastMoods = analysis.moods;
+    conversationMemory.collectedInfo.mood = true; // סימון כמידע שנאסף
   }
-  // Handle platforms specifically. If Gemini finds "no" platforms, ensure it's recorded.
-  if (analysis.platforms !== undefined) { // Check if platforms field exists in Gemini's output
-      conversationMemory.lastPlatforms = analysis.platforms;
-      conversationMemory.collectedInfo.platforms = true;
+  if (analysis.platforms !== undefined) {
+    conversationMemory.lastPlatforms = analysis.platforms;
+    conversationMemory.collectedInfo.platforms = true;
   }
   if (analysis.ageRange) {
     conversationMemory.userPreferences.age = analysis.ageRange;
@@ -387,13 +395,10 @@ async function generateSmartResponse(message, movies) {
   if (analysis.directors && analysis.directors.length > 0) {
     conversationMemory.userPreferences.favoriteDirectors = analysis.directors;
   }
-  // Store excluded genres from Gemini, if any
-  conversationMemory.excludeGenres = analysis.excludeGenres || [];
-
 
   console.log("Debug: generateSmartResponse - conversationMemory after update:", { ...conversationMemory });
 
-  // Check if enough info is collected
+  // בדיקה אם נאסף מספיק מידע להמלצות
   const infoTypesToCollect = ["genres", "age", "duration", "platforms"];
   const allRequiredInfoCollected = infoTypesToCollect.every(type => conversationMemory.collectedInfo[type] === true);
 
@@ -404,7 +409,7 @@ async function generateSmartResponse(message, movies) {
 
     console.log("🎯 מחפש סרטים עם הז'אנרים:", conversationMemory.lastGenres);
 
-    const foundMovies = analyzeAndFindMovies(movies); // Now only depends on conversationMemory
+    const foundMovies = analyzeAndFindMovies(movies);
     const moviesToRecommend = foundMovies.slice(conversationMemory.recommendationOffset, conversationMemory.recommendationOffset + 3);
 
     if (moviesToRecommend.length > 0) {
@@ -418,7 +423,7 @@ async function generateSmartResponse(message, movies) {
         response += "<br>רוצה לראות המלצות נוספות? פשוט תגיד 'עוד' או 'אחרים'! 😉<br>";
       }
 
-      // Add mood-specific response
+      // הוספת תגובה מותאמת למצב רוח
       if (analysis.moods && analysis.moods.length > 0) {
         const mood = analysis.moods[0];
         switch (mood) {
@@ -450,7 +455,7 @@ async function generateSmartResponse(message, movies) {
         response += "<br><br>מצטער, לא מצאתי סרטים שמתאימים בדיוק להעדפות שלך.";
       }
 
-      // Reset if no movies found at all
+      // איפוס אם לא נמצאו סרטים כלל
       conversationMemory.collectedInfo = {
         genres: false,
         age: false,
@@ -459,13 +464,13 @@ async function generateSmartResponse(message, movies) {
         platforms: false
       };
       conversationMemory.lastGenres = [];
+      conversationMemory.excludeGenres = [];
       conversationMemory.lastPlatforms = [];
       conversationMemory.userPreferences.age = null;
       conversationMemory.userPreferences.duration = null;
       conversationMemory.userPreferences.favoriteActors = [];
       conversationMemory.userPreferences.favoriteDirectors = [];
       conversationMemory.recommendationOffset = 0;
-      conversationMemory.excludeGenres = [];
 
       const nextQuestion = getNextQuestion();
       if (nextQuestion) {
@@ -477,6 +482,7 @@ async function generateSmartResponse(message, movies) {
       }
     }
   } else {
+    // עדיין אוספים מידע מהמשתמש
     const nextQuestion = getNextQuestion();
     console.log("Debug: generateSmartResponse - nextQuestion:", nextQuestion ? nextQuestion.id : null);
 
@@ -485,7 +491,7 @@ async function generateSmartResponse(message, movies) {
     if (analysis.ageRange) providedInfo.push("גיל");
     if (analysis.duration) providedInfo.push("אורך סרט");
     if (analysis.platforms && analysis.platforms.length > 0) providedInfo.push("פלטפורמת צפייה");
-    // Only acknowledge if new information was explicitly provided, not just confirmation
+
     if (providedInfo.length > 0 || (analysis.moods && analysis.moods.length > 0)) {
         if (providedInfo.length > 0) {
             response += `תודה על המידע שסיפקת בנוגע ל${providedInfo.join(' ו-')}.`;
@@ -494,12 +500,10 @@ async function generateSmartResponse(message, movies) {
             response += ` אני מבין שאתה מרגיש ${analysis.moods[0]}.`;
         }
         response += " <br><br>";
-    } else {
-        // If no new info and not a clear message, just say something polite before asking the next question
-        if (message.trim().length > 0) { // Check if it's not an empty message
-             response += "אוקיי. ";
-             response += " <br><br>";
-        }
+    } else if (message.trim().length > 0) {
+        // תגובה כללית אם לא חולץ מידע ספציפי חדש
+        response += "אוקיי. ";
+        response += " <br><br>";
     }
 
 
@@ -507,7 +511,6 @@ async function generateSmartResponse(message, movies) {
       response += `${nextQuestion.question}`;
       conversationMemory.lastQuestion = nextQuestion.id;
     } else {
-      // Fallback if no next question, but not all info collected (shouldn't happen with the current flow)
       response += "אנא ספר לי עוד על מה שאתה מחפש.";
       conversationMemory.lastQuestion = null;
     }
@@ -517,76 +520,67 @@ async function generateSmartResponse(message, movies) {
   return response || "אשמח לעזור לך למצוא סרט מושלם! מה מעניין אותך?";
 }
 
-
-// Function to find movies based on conversation memory
+// פונקציה לחיפוש סרטים (הותאמה לעבודה עם זיכרון השיחה וז'אנרים באנגלית)
 function analyzeAndFindMovies(movies) {
   let filtered = [...movies];
 
   console.log("🔍 מחפש סרטים בהתאם לזיכרון השיחה:");
   console.log("📊 זיכרון שיחה נוכחי:", conversationMemory);
 
-  // Filter by requested genres
+  // סינון לפי ז'אנר
   if (conversationMemory.lastGenres.length > 0) {
     console.log("Debug: analyzeAndFindMovies - Filtering by genres:", conversationMemory.lastGenres);
     filtered = filtered.filter(movie => {
       const movieGenres = movie.Genres.toLowerCase().split(", ").map(g => g.trim());
       return conversationMemory.lastGenres.some(requestedGenre => {
-        // Convert requested Hebrew genre from Gemini to English if needed for matching
-        const englishGenre = requestedGenre.toLowerCase(); // Gemini should return English, but normalize just in case
-        return movieGenres.includes(englishGenre);
+        // Gemini אמור להחזיר ז'אנרים באנגלית, אז נשווה ישירות
+        return movieGenres.includes(requestedGenre.toLowerCase());
       });
     });
     console.log("Debug: analyzeAndFindMovies - Movies after genre filtering:", filtered.map(m => m.Title));
   }
 
-  // Filter out excluded genres
+  // סינון החוצה ז'אנרים לא רצויים
   if (conversationMemory.excludeGenres && conversationMemory.excludeGenres.length > 0) {
     console.log("Debug: analyzeAndFindMovies - Excluding genres:", conversationMemory.excludeGenres);
     filtered = filtered.filter(movie => {
       const movieGenres = movie.Genres.toLowerCase().split(", ").map(g => g.trim());
       return !conversationMemory.excludeGenres.some(excludedGenre => {
-        const englishExcludedGenre = excludedGenre.toLowerCase();
-        return movieGenres.includes(englishExcludedGenre);
+        return movieGenres.includes(excludedGenre.toLowerCase());
       });
     });
     console.log("Debug: analyzeAndFindMovies - Movies after excludeGenre filtering:", filtered.map(m => m.Title));
   }
 
-
-  // Filter by mood (can also infer genres based on mood if Gemini didn't)
+  // סינון לפי מצב רוח (ניתן להסיק ז'אנרים לפי מצב רוח אם Gemini לא זיהה)
   if (conversationMemory.lastMoods.length > 0) {
     console.log("Debug: analyzeAndFindMovies - Filtering by mood. Current movies:", filtered.map(m => m.Title));
     const mood = conversationMemory.lastMoods[0];
     switch (mood) {
       case "עצוב":
+      case "רגוע":
+      case "עייף":
+        // להציג סרטים שמחים/קלילים יותר
         filtered = filtered.filter(movie =>
           movie.Genres.toLowerCase().includes("comedy") ||
           movie.Genres.toLowerCase().includes("family") ||
-          movie.Genres.toLowerCase().includes("animation")
+          movie.Genres.toLowerCase().includes("animation") ||
+          movie.Genres.toLowerCase().includes("romance")
         );
         break;
-      case "שמח": // If Gemini inferred "שמח", prioritize upbeat genres
+      case "שמח":
+      case "מרומם":
+      case "מעורר השראה":
       case "משעשע":
+        // להציג סרטים מעודדים/מצחיקים/דרמות חיוביות
         filtered = filtered.filter(movie =>
           movie.Genres.toLowerCase().includes("comedy") ||
-          movie.Genres.toLowerCase().includes("animation") ||
-          movie.Genres.toLowerCase().includes("family")
-        );
-        break;
-      case "מרומם": // Encouraging/inspirational
-      case "מעורר השראה":
-        filtered = filtered.filter(movie =>
-          movie.Genres.toLowerCase().includes("drama") ||
           movie.Genres.toLowerCase().includes("biography") ||
-          movie.Genres.toLowerCase().includes("history")
+          (movie.Genres.toLowerCase().includes("drama") && movie.Rating && parseFloat(movie.Rating) >= 7.5) // דרמות עם דירוג גבוה יותר
         );
         break;
-      case "רגוע": // Calm
-        filtered = filtered.filter(movie =>
-          !(movie.Genres.toLowerCase().includes("action") || movie.Genres.toLowerCase().includes("thriller") || movie.Genres.toLowerCase().includes("horror"))
-        );
-        break;
-      case "מרגש": // Emotional/thrilling (can be drama or thriller)
+      case "מרגש":
+        // להציג סרטים עם עלילה סוחפת
         filtered = filtered.filter(movie =>
           movie.Genres.toLowerCase().includes("drama") ||
           movie.Genres.toLowerCase().includes("thriller") ||
@@ -602,47 +596,46 @@ function analyzeAndFindMovies(movies) {
         break;
       case "רומנטי":
         filtered = filtered.filter(movie =>
-          movie.Genres.toLowerCase().includes("romance") ||
-          (movie.Genres.toLowerCase().includes("comedy") && movie.Genres.toLowerCase().includes("drama"))
+          movie.Genres.toLowerCase().includes("romance")
         );
         break;
       case "נוסטלגי":
         filtered = filtered.filter(movie =>
-          movie.Release_Year < 2005 // Arbitrary year for "nostalgic"
+          movie.Release_Year < 2005
         );
         break;
-      case "משועמם": // Maybe something exciting
+      case "משועמם":
         filtered = filtered.filter(movie =>
           movie.Genres.toLowerCase().includes("action") ||
           movie.Genres.toLowerCase().includes("adventure") ||
-          movie.Genres.toLowerCase().includes("sci-fi")
-        );
-        break;
-      case "עייף": // Something light and short
-        filtered = filtered.filter(movie =>
-          (movie.Duration && movie.Duration <= 100) &&
-          (movie.Genres.toLowerCase().includes("comedy") || movie.Genres.toLowerCase().includes("animation") || movie.Genres.toLowerCase().includes("family"))
+          movie.Genres.toLowerCase().includes("sci-fi") ||
+          movie.Genres.toLowerCase().includes("thriller")
         );
         break;
     }
     console.log("Debug: analyzeAndFindMovies - Movies after mood filtering:", filtered.map(m => m.Title));
   }
 
-
-  // Filter by platform
+  // סינון לפי פלטפורמה
   if (conversationMemory.lastPlatforms.length > 0) {
     console.log("Debug: analyzeAndFindMovies - Filtering by platforms. Current movies:", filtered.map(m => m.Title));
     filtered = filtered.filter(movie =>
       conversationMemory.lastPlatforms.some(platform => {
-        // Ensure platform name matches the JSON key (e.g., "נטפליקס" not "netflix")
-        const normalizedPlatform = platform.charAt(0).toUpperCase() + platform.slice(1); // Capitalize first letter (e.g. "נטפליקס")
-        return movie[normalizedPlatform] === 1;
+        // וודא ששם הפלטפורמה מתאים למפתח ב-JSON (למשל, "נטפליקס")
+        return movie[platform] === 1;
       })
     );
     console.log("Debug: analyzeAndFindMovies - Movies after platform filtering:", filtered.map(m => m.Title));
+  } else if (conversationMemory.collectedInfo.platforms && conversationMemory.lastPlatforms.length === 0) {
+    // אם המשתמש אמר שאין לו מנוי לאף אחת, אל תסנן לפי פלטפורמה.
+    // הקריאה "אף אחד" או "אין לי" תגרום ל-analysis.platforms להיות ריק.
+    // במקרה זה, לא נסנן בכלל, אלא אם כן המשתמש ציין פלטפורמה מסוימת שאין לו.
+    // אם הוא לא ציין אף פלטפורמה, ופשוט אמר "אין לי", נתייחס לזה כחוסר העדפה.
+    console.log("Debug: User stated no specific platform preference, or no platforms available. Not filtering by platform.");
   }
 
-  // Filter by age
+
+  // סינון לפי גיל
   if (conversationMemory.userPreferences.age) {
     console.log("Debug: analyzeAndFindMovies - Filtering by age. User preference:", conversationMemory.userPreferences.age, ". Current movies:", filtered.map(m => m.Title));
     filtered = filtered.filter(movie => {
@@ -650,13 +643,14 @@ function analyzeAndFindMovies(movies) {
       const userAgePreference = conversationMemory.userPreferences.age;
       let isMatch = false;
 
-      // Logic based on movie's stated age range vs. user's preference
       if (userAgePreference === "7+") {
         isMatch = (movieAgeRange === "7+" || movieAgeRange === "All Ages");
       } else if (userAgePreference === "13+") {
         isMatch = (movieAgeRange === "7+" || movieAgeRange === "13+" || movieAgeRange === "All Ages");
       } else if (userAgePreference === "17+") {
-        isMatch = true; // All movies are potentially suitable for 17+ (they can decide)
+        isMatch = true; // 17+ יכולים לראות הכל
+      } else if (userAgePreference === "All Ages") { // למי שרוצה "כל הגילאים"
+        isMatch = (movieAgeRange === "All Ages" || movieAgeRange === "7+" || movieAgeRange === "13+" || movieAgeRange === "17+");
       }
 
       console.log(`Debug: Checking movie '${movie.Title}' (age: ${movie.ageRange}) against user preference '${conversationMemory.userPreferences.age}'. Match: ${isMatch}`);
@@ -665,7 +659,7 @@ function analyzeAndFindMovies(movies) {
     console.log("Debug: analyzeAndFindMovies - Movies after age filtering:", filtered.map(m => m.Title));
   }
 
-  // Filter by movie duration
+  // סינון לפי אורך סרט
   if (conversationMemory.userPreferences.duration) {
     console.log("Debug: analyzeAndFindMovies - Filtering by duration. User preference:", conversationMemory.userPreferences.duration, ". Current movies:", filtered.map(m => m.Title));
     filtered = filtered.filter(movie => {
@@ -678,7 +672,7 @@ function analyzeAndFindMovies(movies) {
     console.log("Debug: analyzeAndFindMovies - Movies after duration filtering:", filtered.map(m => m.Title));
   }
 
-  // Filter by actors (requires 'Stars' field in movies.json)
+  // סינון לפי שחקנים (דורש שדה 'Stars' ב-movies.json)
   if (conversationMemory.userPreferences.favoriteActors.length > 0) {
     filtered = filtered.filter(movie =>
       movie.Stars && conversationMemory.userPreferences.favoriteActors.some(actor =>
@@ -687,7 +681,7 @@ function analyzeAndFindMovies(movies) {
     );
   }
 
-  // Filter by directors (requires 'Director' field in movies.json)
+  // סינון לפי במאים (דורש שדה 'Director' ב-movies.json)
   if (conversationMemory.userPreferences.favoriteDirectors.length > 0) {
     filtered = filtered.filter(movie =>
       movie.Director && conversationMemory.userPreferences.favoriteDirectors.some(director =>
@@ -696,188 +690,11 @@ function analyzeAndFindMovies(movies) {
     );
   }
 
-  // Sort by rating (descending)
+  // מיון לפי דירוג (מהגבוה לנמוך)
   filtered.sort((a, b) => parseFloat(b.Rating) - parseFloat(a.Rating));
 
-  // Store the full set of current recommendations in memory
+  // שמירת ההמלצות בזיכרון
   conversationMemory.lastRecommendations = filtered;
 
   console.log("🎯 סה״כ סרטים שנמצאו:", filtered.length);
-  console.log("🏆 סרטים סופיים:", filtered.map(m => `${m.Title} (${m.Genres})`));
-
-  return filtered;
-}
-
-// Format movie recommendation for display
-function formatMovieRecommendation(movie) {
-  const platforms = [];
-  if (movie["נטפליקס"] === 1) platforms.push("נטפליקס");
-  if (movie["יס"] === 1) platforms.push("יס");
-  if (movie["הוט"] === 1) platforms.push("הוט");
-
-  let trailerLinkHTML = '';
-  if (movie.trailer) {
-    trailerLinkHTML = `<br>🎥 <a href="${movie.trailer}" target="_blank" class="movie-link">צפה בטריילר</a>`;
-  } else {
-    const searchQuery = encodeURIComponent(`${movie.Title} ${movie.Release_Year} trailer`);
-    const youtubeSearchUrl = `https://www.youtube.com/results?search_query=${searchQuery}`;
-    trailerLinkHTML = `<br>🎥 <a href="${youtubeSearchUrl}" target="_blank" class="movie-link">חפש טריילר ביוטיוב</a>`;
-  }
-
-  let html = `🎬 <strong>"${movie.Title}"</strong> (${movie.Release_Year})<br>
-🎭 ז'אנר: ${movie.Genres}<br>
-⭐ דירוג IMDb: <strong>${movie.Rating}</strong><br>
-👥 גיל מומלץ: ${movie.ageRange}<br>
-📺 זמין ב: ${platforms.join(", ") || "לא צוינה פלטפורמה"}`;
-
-  html += trailerLinkHTML;
-
-  return html;
-}
-
-// Function to send message
-async function sendMessage() {
-  const input = document.getElementById("userInput");
-  const message = input.value.trim();
-  if (!message) return;
-
-  input.value = "";
-
-  const convo = document.getElementById("conversation");
-
-  convo.innerHTML += `<div class='bubble user'>${message}</div>`;
-  const loadingId = Date.now();
-  convo.innerHTML += `<div class='bubble bot' id='loading-${loadingId}'>
-    <img src="OSCARPIC.jpeg" alt="Oscar" class="bot-avatar">
-    <div class="bot-message">🤔 חושב על התשובה הטובה ביותר...</div>
-  </div>`;
-
-  try {
-    const movies = await loadMoviesDatabase();
-    const smartResponse = await generateSmartResponse(message, movies); // Await here
-
-    document.getElementById(`loading-${loadingId}`).remove();
-    convo.innerHTML += `<div class='bubble bot'>
-      <img src="OSCARPIC.jpeg" alt="Oscar" class="bot-avatar">
-      <div class="bot-message">${smartResponse}</div>
-    </div>`;
-
-  } catch (error) {
-    const loadingElement = document.getElementById(`loading-${loadingId}`);
-    if (loadingElement) loadingElement.remove();
-
-    console.error("❌ שגיאה:", error);
-    showError(error);
-  }
-
-  convo.scrollTop = convo.scrollHeight;
-}
-
-// Function to handle errors
-function showError(error) {
-  const convo = document.getElementById("conversation");
-  let errorMessage = "אופס! משהו השתבש. בוא ננסה שוב? 🔧";
-
-  if (typeof error === 'string') {
-    errorMessage = error;
-  } else if (error.message) {
-    if (error.message.includes("Failed to load movies")) {
-      errorMessage = `⚠️ לא הצלחתי לטעון את מאגר הסרטים.<br>
-        אנא וודא שקובץ movies.json קיים ונגיש.`;
-    } else if (error.message.includes("Gemini API call failed")) {
-       errorMessage = `אוי לא! נראה שיש בעיה עם חיבור ה-AI. אנא נסה שוב בעוד רגע. 🤖`;
-    } else if (error.message.includes("JSON.parse")) {
-       errorMessage = `אופס! הייתה בעיה בהבנת התשובה מה-AI. נסה לנסח מחדש את בקשתך. 🙏`;
-    }
-  }
-
-  convo.innerHTML += `<div class='bubble bot'>
-    <img src="OSCARPIC.jpeg" alt="Oscar" class="bot-avatar">
-    <div class="bot-message">${errorMessage}</div>
-  </div>`;
-}
-
-// Keyboard events and initialization
-document.addEventListener('DOMContentLoaded', function() {
-  console.log("🚀 העמוד נטען - מתחיל אתחול...");
-
-  const input = document.getElementById("userInput");
-  const sendButton = document.getElementById("sendButton"); // Get the button by ID
-  const convo = document.getElementById("conversation");
-
-  if (!input || !convo || !sendButton) {
-    console.error("❌ אלמנטים חיוניים לא נמצאו");
-    return;
-  }
-
-  console.log("✅ אלמנטים נמצאו בהצלחה");
-
-  input.addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-      sendMessage();
-    }
-  });
-  sendButton.addEventListener('click', sendMessage); // Add event listener to the send button
-  console.log("✅ Event listener הוגדר לקלט ולכפתור השליחה");
-
-  try {
-    const randomWelcome = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
-    console.log("🎭 הודעת ברוכים הבאים נבחרה:", randomWelcome);
-
-    convo.innerHTML = `<div class='bubble bot'>
-      <img src="OSCARPIC.jpeg" alt="Oscar" class="bot-avatar">
-      <div class="bot-message">${randomWelcome}</div>
-    </div>`;
-
-    console.log("✅ הודעת פתיחה נוספה בהצלחה");
-  } catch (error) {
-    console.error("❌ שגיאה בהוספת הודעת פתיחה:", error);
-
-    convo.innerHTML = `<div class='bubble bot'>
-      <img src="OSCARPIC.jpeg" alt="Oscar" class="bot-avatar">
-      <div class="bot-message">שלום! אני אוסקר, בוט המלצות הסרטים שלך 🎬 איזה סרט מעניין אותך היום?</div>
-    </div>`;
-  }
-
-  console.log("🎉 אתחול הושלם בהצלחה - אוסקר מוכן לשימוש!");
-});
-
-// Function to clear conversation
-function clearConversation(userMessage = null) {
-  const convo = document.getElementById("conversation");
-  convo.innerHTML = '';
-  conversationMemory = {
-    lastGenres: [],
-    lastMoods: [],
-    lastPlatforms: [],
-    lastRecommendations: [],
-    lastQuestion: null,
-    userPreferences: {
-      age: null,
-      duration: null,
-      favoriteActors: [],
-      favoriteDirectors: []
-    },
-    conversationState: "collecting_info",
-    collectedInfo: {
-      genres: false,
-      age: false,
-      mood: false,
-      duration: false,
-      platforms: false
-    },
-    recommendationOffset: 0,
-    excludeGenres: [] // Reset this too
-  };
-
-  if (userMessage) {
-    convo.innerHTML += `<div class='bubble user'>${userMessage}</div>`;
-  }
-
-  const randomWelcome = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
-  convo.innerHTML += `<div class='bubble bot'>
-    <img src="OSCARPIC.jpeg" alt="Oscar" class="bot-avatar">
-    <div class="bot-message">${randomWelcome}</div>
-  </div>`;
-  convo.scrollTop = convo.scrollHeight; // Scroll to bottom after clearing
-}
+  console.log("🏆 סרטים סופיים:", filtered.map(m => `${m.
