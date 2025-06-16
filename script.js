@@ -121,6 +121,7 @@ const backupMovies = [
 ];
 
 const API_KEY = "AIzaSyAq-ngUJxyiZM2zkKyyv2yq2b5KsDx5c1M"; // המפתח שלך
+const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
 const model = new GoogleGenerativeAI(API_KEY).getGenerativeModel({ model: "gemini-pro" });
 
 // פונקציה לטעינת מאגר סרטים
