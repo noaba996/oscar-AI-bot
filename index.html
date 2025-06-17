@@ -46,7 +46,7 @@
       flex-direction: column;
       gap: 20px;
       margin-bottom: 20px;
-      overflow: hidden; /* שינוי: מונע גלילה של הקונטיינר */
+      overflow: hidden;
       min-height: 0;
     }
 
@@ -106,6 +106,42 @@
       flex: 1;
       text-align: left;
       order: 2;
+    }
+
+    /* עיצוב כפתורים אינטראקטיביים */
+    .interactive-buttons {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+      margin: 15px 0;
+      max-width: 100%;
+    }
+
+    .choice-button {
+      padding: 12px 20px;
+      border: 2px solid #007bff;
+      border-radius: 25px;
+      background: rgba(0, 123, 255, 0.1);
+      color: #007bff;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 14px;
+      font-weight: 500;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .choice-button:hover {
+      background: #007bff;
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+    }
+
+    .choice-button:active {
+      transform: translateY(0);
     }
 
     .input-area {
@@ -214,6 +250,16 @@
         padding: 12px;
       }
 
+      .interactive-buttons {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+
+      .choice-button {
+        padding: 10px 15px;
+        font-size: 13px;
+      }
+
       #userInput {
         padding: 12px;
         font-size: 14px;
@@ -243,7 +289,7 @@
       <div id="conversation"></div>
       <div class="input-area">
         <input type="text" id="userInput" placeholder="כתוב כאן את הבקשה שלך...">
-        <button id="sendButton">
+        <button id="sendButton" onclick="sendMessage()">
           <span>שלח</span>
           <span>➤</span>
         </button>
