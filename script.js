@@ -7,7 +7,7 @@ const welcomeMessages = [
 
 // 🤖 הגדרות Gemini AI
 const GEMINI_API_KEY = 'AIzaSyANzNK0-8TJLM8XhlXjO-aTLDTePw1PlXc';
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
 
 // 📚 מאגר סרטים זמני (ישמש כגיבוי)
 const backupMovies = [
@@ -543,6 +543,24 @@ function checkUnderstanding(message, questionId) {
   return !isUnclearText(message);
 }
 
+// פונקציה לקבלת שאלה הבאה
+function getNextQuestion() {
+  const allInfoCollected = Object.values(conversationMemory.collectedInfo).every(info => info === true);
+  if (allInfoCollected) {
+    return null;
+  }
+
+  const questionOrder = ["genres", "age", "duration", "platforms"];
+  
+  for (const questionId of questionOrder) {
+    if (!conversationMemory.collectedInfo[questionId]) {
+      return interactiveQuestions.find(q => q.id === questionId);
+    }
+  }
+
+  return null;
+}
+
 // פונקציה ליצירת כפתורים אינטראקטיביים
 function createInteractiveButtons(question) {
   if (!question.hasButtons) return '';
@@ -608,6 +626,8 @@ async function processUserChoice(choice) {
     showError(error);
   }
 
+  convo.scrollTop = convo.scrollHeight;
+}
   const allInfoCollected = Object.values(conversationMemory.collectedInfo).every(info => info === true);
   if (allInfoCollected) {
     return null;
@@ -622,7 +642,6 @@ async function processUserChoice(choice) {
   }
 
   return null;
-  convo.scrollTop = convo.scrollHeight;
 }
 
 // פונקציה ליצירת תשובה חכמה - עודכנה לעבוד עם AI
