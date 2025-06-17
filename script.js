@@ -627,7 +627,7 @@ async function processUserChoice(choice) {
   }
 
   convo.scrollTop = convo.scrollHeight;
-}
+
   const allInfoCollected = Object.values(conversationMemory.collectedInfo).every(info => info === true);
   if (allInfoCollected) {
     return null;
