@@ -624,7 +624,6 @@ async function processUserChoice(choice) {
   return null;
   convo.scrollTop = convo.scrollHeight;
 }
-}
 
 // פונקציה ליצירת תשובה חכמה - עודכנה לעבוד עם AI
 async function generateSmartResponse(message, movies) {
