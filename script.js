@@ -608,8 +608,6 @@ async function processUserChoice(choice) {
     showError(error);
   }
 
-  convo.scrollTop = convo.scrollHeight;
-}
   const allInfoCollected = Object.values(conversationMemory.collectedInfo).every(info => info === true);
   if (allInfoCollected) {
     return null;
@@ -624,6 +622,8 @@ async function processUserChoice(choice) {
   }
 
   return null;
+  convo.scrollTop = convo.scrollHeight;
+}
 }
 
 // פונקציה ליצירת תשובה חכמה - עודכנה לעבוד עם AI
