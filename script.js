@@ -850,10 +850,10 @@ function clearConversation(userMessage = null) {
     convo.innerHTML += `<div class='bubble user'>${userMessage}</div>`;
   }
 
-  const randomWelcome = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
- convo.innerHTML += `<div class='bubble bot'>
+const randomWelcome = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
+convo.innerHTML += `<div class='bubble bot'>
   <img src="OSCARPIC.jpeg" alt="Oscar" class="bot-avatar">
-  <div class="bot-message">🤖 מעבד את הבחירה שלך...</div>
+  <div class="bot-message">${randomWelcome}</div>
 </div>`;
 }
 
