@@ -822,6 +822,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function clearConversation(userMessage = null) {
   const convo = document.getElementById("conversation");
   convo.innerHTML = '';
+
   conversationMemory = {
     lastGenres: [],
     lastMoods: [],
@@ -855,7 +856,7 @@ function clearConversation(userMessage = null) {
     <img src="OSCARPIC.jpeg" alt="Oscar" class="bot-avatar">
     <div class="bot-message">${randomWelcome}</div>
   </div>`;
-
+}
   try {
     const movies = await loadMoviesDatabase();
     const smartResponse = await generateSmartResponse(choice, movies);
