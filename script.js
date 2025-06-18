@@ -890,13 +890,12 @@ function clearConversation(userMessage = null) {
     convo.innerHTML += `<div class='bubble user'>${userMessage}</div>`;
   }
 
-  const randomWelcome = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
-  convo.innerHTML += `<div class='bubble bot'>
-    <img src="OSCARPIC.jpeg" alt="Oscar" class="bot-avatar">
-    <div class="bot-message">${randomWelcome}</div>
-  </div>`;
-}🤖 מעבד את הבחירה שלך...</div>
-  </div>`;
+const randomWelcome = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
+convo.innerHTML += `<div class='bubble bot'>
+  <img src="OSCARPIC.jpeg" alt="Oscar" class="bot-avatar">
+  <div class="bot-message">${randomWelcome}</div>
+</div>`;
+}
 
   try {
     const movies = await loadMoviesDatabase();
