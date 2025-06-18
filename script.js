@@ -822,7 +822,6 @@ document.addEventListener('DOMContentLoaded', function() {
 function clearConversation(userMessage = null) {
   const convo = document.getElementById("conversation");
   convo.innerHTML = '';
-
   conversationMemory = {
     lastGenres: [],
     lastMoods: [],
@@ -856,7 +855,9 @@ function clearConversation(userMessage = null) {
     <img src="OSCARPIC.jpeg" alt="Oscar" class="bot-avatar">
     <div class="bot-message">${randomWelcome}</div>
   </div>`;
-}
+}🤖 מעבד את הבחירה שלך...</div>
+  </div>`;
+
   try {
     const movies = await loadMoviesDatabase();
     const smartResponse = await generateSmartResponse(choice, movies);
@@ -933,42 +934,34 @@ async function generateSmartResponse(message, movies) {
     console.log("Debug: generateSmartResponse - 'Other' command detected, incrementing offset to:", conversationMemory.recommendationOffset);
   }
 
-  // עדכון זיכרון השיחה על בסיס ניתוח ה-AI - ללא הודעות חוזרות
-  let newInfoAdded = false;
-  
+  // עדכון זיכרון השיחה על בסיס ניתוח ה-AI
   if (analysis.genres && analysis.genres.length > 0) {
     conversationMemory.lastGenres = analysis.genres;
     conversationMemory.collectedInfo.genres = true;
-    newInfoAdded = true;
   }
 
   if (analysis.mood) {
     conversationMemory.lastMoods = [analysis.mood];
-    newInfoAdded = true;
   }
   
   if (analysis.platforms && analysis.platforms.length > 0) {
     conversationMemory.lastPlatforms = analysis.platforms;
     conversationMemory.collectedInfo.platforms = true;
-    newInfoAdded = true;
   } else if (analysis.platforms && analysis.platforms.length === 0 && 
-             (message.toLowerCase().includes("לא") || message.toLowerCase().includes("אין"))) {
+             message.toLowerCase().includes("לא") || message.toLowerCase().includes("אין")) {
     // המשתמש אמר שאין לו מנויים
     conversationMemory.lastPlatforms = [];
     conversationMemory.collectedInfo.platforms = true;
-    newInfoAdded = true;
   }
   
   if (analysis.ageRange) {
     conversationMemory.userPreferences.age = analysis.ageRange;
     conversationMemory.collectedInfo.age = true;
-    newInfoAdded = true;
   }
   
   if (analysis.duration) {
     conversationMemory.userPreferences.duration = analysis.duration;
     conversationMemory.collectedInfo.duration = true;
-    newInfoAdded = true;
   }
 
   console.log("Debug: generateSmartResponse - conversationMemory after update:", { ...conversationMemory });
@@ -988,7 +981,7 @@ async function generateSmartResponse(message, movies) {
     const moviesToRecommend = foundMovies.slice(conversationMemory.recommendationOffset, conversationMemory.recommendationOffset + 3);
 
     if (moviesToRecommend.length > 0) {
-      response += "הנה כמה המלצות בשבילך:<br><br>";
+      response += "<br><br>הנה כמה המלצות בשבילך:<br><br>";
       
       moviesToRecommend.forEach((movie, index) => {
         response += `${index + 1}. ${formatMovieRecommendation(movie)}<br><br>`;
@@ -998,8 +991,8 @@ async function generateSmartResponse(message, movies) {
         response += "<br>רוצה לראות המלצות נוספות? פשוט תגיד 'עוד' או 'אחרים'! 😉<br>";
       }
 
-      // הוספת תגובה מותאמת למצב רוח - רק אם זה רלוונטי
-      if (analysis.mood && newInfoAdded) {
+      // הוספת תגובה מותאמת למצב רוח
+      if (analysis.mood) {
         const mood = analysis.mood;
         switch(mood) {
           case "עצוב":
@@ -1025,9 +1018,9 @@ async function generateSmartResponse(message, movies) {
 
     } else {
       if (conversationMemory.recommendationOffset > 0) {
-        response += "זהו, נראה שאלו כל הסרטים שמצאתי עבור ההעדפות הנוכחיות שלך. אולי ננסה עם העדפות אחרות? 😉";
+        response += "<br><br>זהו, נראה שאלו כל הסרטים שמצאתי עבור ההעדפות הנוכחיות שלך. אולי ננסה עם העדפות אחרות? 😉";
       } else {
-        response += "מצטער, לא מצאתי סרטים שמתאימים בדיוק להעדפות שלך.";
+        response += "<br><br>מצטער, לא מצאתי סרטים שמתאימים בדיוק להעדפות שלך.";
       }
       
       // איפוס מחדש רק אם לא נמצאו סרטים בכלל
@@ -1057,9 +1050,26 @@ async function generateSmartResponse(message, movies) {
     const nextQuestion = getNextQuestion();
     console.log("Debug: generateSmartResponse - nextQuestion:", nextQuestion ? nextQuestion.id : null);
 
-    // הודעה מקוצרת ועניינית יותר
-    if (newInfoAdded) {
-      response += "בכיף! ";
+    const providedInfo = [];
+    if(analysis.genres && analysis.genres.length > 0) providedInfo.push("ז'אנר");
+    if(analysis.ageRange) providedInfo.push("גיל");
+    if(analysis.duration) providedInfo.push("אורך סרט");
+    if(analysis.platforms && analysis.platforms.length > 0) providedInfo.push("פלטפורמת צפייה");
+
+    if(providedInfo.length > 0) {
+      response += `תודה על המידע שסיפקת בנוגע ל${providedInfo.join(' ו-')}.`;
+      if (analysis.mood) {
+        response += ` אני מבין שאתה מרגיש ${analysis.mood}.`;
+      }
+      response += " <br><br>";
+    } else {
+      if (analysis.mood) {
+        response += `אני מבין שאתה מרגיש ${analysis.mood}.`;
+        response += " <br><br>";
+      } else if (!isUnclearText(message)) {
+        response += "תודה על המידע. ";
+        response += " <br><br>";
+      }
     }
 
     if (nextQuestion) {
@@ -1290,6 +1300,7 @@ async function sendMessage() {
   input.value = "";
 
   const lowerMessage = message.toLowerCase();
+  const greetings = ["היי", "שלום", "הי", "בוקר טוב"];
   const resetKeywords = ["התחל שיחה חדשה", "אפס", "חדש"];
 
   const convo = document.getElementById("conversation");
@@ -1300,15 +1311,7 @@ async function sendMessage() {
     return;
   }
 
-  // בדיקה אם זה רק ברכה פשוטה (ללא תוכן נוסף)
-  const simpleGreetings = ["היי", "שלום", "הי", "בוקר טוב", "שלום אוסקר"];
-  const isOnlyGreeting = simpleGreetings.some(g => 
-    lowerMessage === g || 
-    lowerMessage === g + "!" || 
-    lowerMessage === g + "."
-  );
-
-  if (isOnlyGreeting) {
+  if (greetings.some(g => lowerMessage.includes(g))) {
     convo.innerHTML += `<div class='bubble user'>${message}</div>`;
     const welcomeResponse = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
     convo.innerHTML += `<div class='bubble bot'>
