@@ -896,7 +896,6 @@ convo.innerHTML += `<div class='bubble bot'>
   <div class="bot-message">${randomWelcome}</div>
 </div>`;
 }
-}
 
 // פונקציה ליצירת תשובה חכמה - עודכנה לעבוד עם AI
 async function generateSmartResponse(message, movies) {
