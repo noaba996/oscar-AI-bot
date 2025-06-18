@@ -48,28 +48,40 @@ const backupMovies = [
     Duration: 105
   },
   {
-    Title: "מלחמת הכוכבים: עלייתו של סקייווקר",
-    Release_Year: 2019,
-    Genres: "Action, Adventure, Sci-Fi",
-    Rating: "6.5",
-    ageRange: "12+",
-    "נטפליקס": 1,
-    "יס": 1,
-    "הוט": 1,
-    trailer: "https://www.youtube.com/watch?v=8Qn_spdM5Zg",
-    Duration: 142
-  },
-  {
-    Title: "ג'וקר",
-    Release_Year: 2019,
-    Genres: "Drama, Thriller",
-    Rating: "8.4",
-    ageRange: "16+",
+    Title: "Life is Beautiful",
+    Release_Year: 1997,
+    Genres: "Comedy, Drama, Romance",
+    Rating: "8.6",
+    ageRange: "13+",
     "נטפליקס": 1,
     "יס": 1,
     "הוט": 0,
-    trailer: "https://www.youtube.com/watch?v=zAGVQLHvwOY",
-    Duration: 122
+    trailer: "https://www.youtube.com/watch?v=pAYEQP8gx3w",
+    Duration: 116
+  },
+  {
+    Title: "Back to the Future",
+    Release_Year: 1985,
+    Genres: "Adventure, Comedy, Sci-Fi",
+    Rating: "8.5",
+    ageRange: "7+",
+    "נטפליקס": 1,
+    "יס": 0,
+    "הוט": 1,
+    trailer: "https://www.youtube.com/watch?v=qvsgGtivCgs",
+    Duration: 116
+  },
+  {
+    Title: "Untouchable",
+    Release_Year: 2011,
+    Genres: "Biography, Comedy, Drama",
+    Rating: "8.5",
+    ageRange: "13+",
+    "נטפליקס": 1,
+    "יס": 1,
+    "הוט": 0,
+    trailer: "https://www.youtube.com/watch?v=34WIbmXkewU",
+    Duration: 112
   }
 ];
 
@@ -586,58 +598,59 @@ function resetConversationMemory() {
   };
 }
 
-// פונקציה ליצירת הודעות מותאמות אישית
+// פונקציה ליצירת הודעות מותאמות אישית - מתוקנת
 function createPersonalizedResponse(analysis, infoType) {
   const gender = conversationMemory.userPreferences.gender || analysis.gender;
   const isFemale = gender === "female";
   
+  console.log("🎯 יוצר תגובה מותאמת:", { infoType, gender, isFemale });
+  
   const responses = {
     genres: {
       male: [
-        `נהדר! ${analysis.genres.join(' ו')} זה בחירה מעולה! 🎬`,
-        `אני רואה שאתה אוהב ${analysis.genres.join(' ו')} - יש לי המלצות מדהימות! 🍿`,
-        `מושלם! ${analysis.genres.join(' ו')} זה ז'אנר שאני מכיר טוב 😊`
+        `מעולה! ${analysis.genres.join(' ו')} זו בחירה טובה! 🎬`,
+        `אני רואה שאתה אוהב ${analysis.genres.join(' ו')} - יש לי המלצות נהדרות! 🍿`,
+        `סופר! ${analysis.genres.join(' ו')} זה ז'אנר שאני מכיר טוב 😊`
       ],
       female: [
-        `נהדר! ${analysis.genres.join(' ו')} זה בחירה מעולה! 🎬`,
-        `אני רואה שאת אוהבת ${analysis.genres.join(' ו')} - יש לי המלצות מדהימות! 🍿`,
-        `מושלם! ${analysis.genres.join(' ו')} זה ז'אנר שאני מכיר טוב 😊`
+        `מעולה! ${analysis.genres.join(' ו')} זו בחירה טובה! 🎬`,
+        `סופר! ${analysis.genres.join(' ו')} זה ז'אנר שאני מכיר טוב 😊`
       ]
     },
     age: {
       male: [
-        "תודה על המידע! עכשיו אני יכול להתאים לך סרטים מתאימים לגיל 👍",
-        "מעולה! זה יעזור לי לבחור סרטים שמתאימים בדיוק בשבילך 🎯",
-        "נהדר! עכשיו אני יודע איזה סרטים יהיו מושלמים עבורך 🌟"
+        "תודה! עכשיו אני יכול להתאים לך סרטים מתאימים 👍",
+        "מושלם! זה יעזור לי לבחור סרטים שמתאימים בדיוק בשבילך 🎯",
+        "אחלה! עכשיו אני יודע איזה סרטים יהיו מושלמים עבורך 🌟"
       ],
       female: [
-        "תודה על המידע! עכשיו אני יכול להתאים לך סרטים מתאימים לגיל 👍",
-        "מעולה! זה יעזור לי לבחור סרטים שמתאימים בדיוק בשבילך 🎯",
-        "נהדר! עכשיו אני יודע איזה סרטים יהיו מושלמים עבורך 🌟"
+        "תודה! עכשיו אני יכול להתאים לך סרטים מתאימים 👍",
+        "מושלם! זה יעזור לי לבחור סרטים שמתאימים בדיוק בשבילך 🎯",
+        "אחלה! עכשיו אני יודע איזה סרטים יהיו מושלמים עבורך 🌟"
       ]
     },
     platforms: {
       male: [
-        "אחלה! עכשיו אני יודע איפה אתה יכול לצפות 📺",
-        "נהדר! זה יעזור לי למצוא סרטים זמינים בשבילך 🎮",
-        "מושלם! עכשיו אני יכול להמליץ לך רק על סרטים שתוכל לראות 👌"
+        "מצוין! עכשיו אני יודע איפה אתה יכול לצפות 📺",
+        "טוב לדעת! זה יעזור לי למצוא סרטים זמינים בשבילך 🎮",
+        "אחלה! עכשיו אני יכול להמליץ לך רק על סרטים שתוכל לראות 👌"
       ],
       female: [
-        "אחלה! עכשיו אני יודע איפה את יכולה לצפות 📺",
-        "נהדר! זה יעזור לי למצוא סרטים זמינים בשבילך 🎮",
-        "מושלם! עכשיו אני יכול להמליץ לך רק על סרטים שתוכלי לראות 👌"
+        "מצוין! עכשיו אני יודע איפה את יכולה לצפות 📺",
+        "טוב לדעת! זה יעזור לי למצוא סרטים זמינים בשבילך 🎮",
+        "אחלה! עכשיו אני יכול להמליץ לך רק על סרטים שתוכלי לראות 👌"
       ]
     },
     duration: {
       male: [
-        "ברור! אני אתאים את ההמלצות לזמן שיש לך ⏰",
-        "מעולה! אני אמצא לך סרטים באורך המתאים 🕒",
-        "נהדר! עכשיו אני יכול להמליץ על סרטים שמתאימים לזמן שלך ⌚"
+        "בסדר! אני אתאים את ההמלצות לזמן שיש לך ⏰",
+        "טוב לדעת! אני אמצא לך סרטים באורך המתאים 🕒",
+        "מושלם! עכשיו אני יכול להמליץ על סרטים שמתאימים לזמן שלך ⌚"
       ],
       female: [
-        "ברור! אני אתאים את ההמלצות לזמן שיש לך ⏰",
-        "מעולה! אני אמצא לך סרטים באורך המתאים 🕒",
-        "נהדר! עכשיו אני יכול להמליץ על סרטים שמתאימים לזמן שלך ⌚"
+        "בסדר! אני אתאים את ההמלצות לזמן שיש לך ⏰",
+        "טוב לדעת! אני אמצא לך סרטים באורך המתאים 🕒",
+        "מושלם! עכשיו אני יכול להמליץ על סרטים שמתאימים לזמן שלך ⌚"
       ]
     }
   };
@@ -646,10 +659,13 @@ function createPersonalizedResponse(analysis, infoType) {
   const typeResponses = responses[infoType]?.[genderKey] || responses[infoType]?.male || [];
   
   if (typeResponses.length > 0) {
-    return typeResponses[Math.floor(Math.random() * typeResponses.length)];
+    const randomResponse = typeResponses[Math.floor(Math.random() * typeResponses.length)];
+    console.log("✨ תגובה שנבחרה:", randomResponse);
+    return randomResponse;
   }
   
-  return isFemale ? "מעולה! " : "מעולה! ";
+  console.log("⚠️ לא נמצאה תגובה מתאימה, משתמש ברירת מחדל");
+  return "תודה על המידע!";
 }
 
 // פונקציה משופרת ליצירת תשובה חכמה
@@ -732,7 +748,7 @@ function handleMoreRecommendations(movies) {
   }
 }
 
-// פונקציה לטיפול במידע חדש מהמשתמש - מתוקנת עם תגובות מותאמות
+// פונקציה לטיפול במידע חדש מהמשתמש - מתוקנת
 function handleNewInfo(analysis, movies) {
   let response = "";
   let newInfoAdded = false;
@@ -759,23 +775,27 @@ function handleNewInfo(analysis, movies) {
     responseType = "age";
   }
   
-  if (analysis.platforms && analysis.platforms.length > 0) {
-    conversationMemory.lastPlatforms = analysis.platforms;
-    conversationMemory.collectedInfo.platforms = true;
-    newInfoAdded = true;
-    responseType = "platforms";
-  } else if (analysis.platforms && analysis.platforms.length === 0) {
-    conversationMemory.lastPlatforms = [];
-    conversationMemory.collectedInfo.platforms = true;
-    newInfoAdded = true;
-    responseType = "platforms";
-  }
-  
   if (analysis.duration) {
     conversationMemory.userPreferences.duration = analysis.duration;
     conversationMemory.collectedInfo.duration = true;
     newInfoAdded = true;
     responseType = "duration";
+  }
+  
+  // טיפול בפלטפורמות - חשוב! צריך לסמן שנאסף המידע גם אם אין פלטפורמות
+  if (analysis.platforms !== null && analysis.platforms !== undefined) {
+    if (analysis.platforms.length > 0) {
+      conversationMemory.lastPlatforms = analysis.platforms;
+      conversationMemory.collectedInfo.platforms = true;
+      newInfoAdded = true;
+      responseType = "platforms";
+    } else {
+      // גם אם אין פלטפורמות - זה עדיין מידע שנאסף
+      conversationMemory.lastPlatforms = [];
+      conversationMemory.collectedInfo.platforms = true;
+      newInfoAdded = true;
+      responseType = "platforms";
+    }
   }
 
   // תגובה למצב רוח רק בפעם הראשונה
@@ -804,18 +824,33 @@ function handleNewInfo(analysis, movies) {
     }
   }
 
-  // אם יש מספיק מידע - תן המלצות
+  // בדיקה אם יש מספיק מידע - חשוב! צריך את כל 4 הקטגוריות
   const allRequiredInfoCollected = ["genres", "age", "duration", "platforms"]
     .every(type => conversationMemory.collectedInfo[type] === true);
+
+  console.log("🔍 בדיקת מידע שנאסף:", {
+    genres: conversationMemory.collectedInfo.genres,
+    age: conversationMemory.collectedInfo.age,
+    duration: conversationMemory.collectedInfo.duration,
+    platforms: conversationMemory.collectedInfo.platforms,
+    allCollected: allRequiredInfoCollected
+  });
 
   if (allRequiredInfoCollected) {
     return generateRecommendations(movies, response);
   } else {
-    // תגובה מותאמת אישית למידע שנוסף
+    // תגובה מותאמת אישית למידע שנוסף - עם דיבאג
     if (newInfoAdded && responseType && response === "") {
-      response += createPersonalizedResponse(analysis, responseType) + " ";
+      const personalizedResponse = createPersonalizedResponse(analysis, responseType);
+      console.log("🎭 תגובה מותאמת אישית:", personalizedResponse);
+      response += personalizedResponse + " ";
     }
-    return response + askForMissingInfo();
+    
+    // הוספת שאלה על המידע החסר
+    const missingInfoResponse = askForMissingInfo();
+    console.log("❓ שאלה על מידע חסר:", missingInfoResponse);
+    
+    return response + missingInfoResponse;
   }
 }
 
