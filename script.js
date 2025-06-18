@@ -855,8 +855,7 @@ function clearConversation(userMessage = null) {
     <img src="OSCARPIC.jpeg" alt="Oscar" class="bot-avatar">
     <div class="bot-message">${randomWelcome}</div>
   </div>`;
-}🤖 מעבד את הבחירה שלך...</div>
-  </div>`;
+}
 
   try {
     const movies = await loadMoviesDatabase();
