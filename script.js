@@ -1342,4 +1342,25 @@ async function sendMessage() {
   const loadingId = Date.now();
   convo.innerHTML += `<div class='bubble bot' id='loading-${loadingId}'>
     <img src="OSCARPIC.jpeg" alt="Oscar" class="bot-avatar">
-    <div class="bot-message">
+    <div class="bot-message">🤖 מעבד את ההודעה שלך...</div>
+  </div>`;
+
+  try {
+    const movies = await loadMoviesDatabase();
+    const smartResponse = await generateSmartResponse(message, movies);
+
+    document.getElementById(`loading-${loadingId}`).remove();
+    convo.innerHTML += `<div class='bubble bot'>
+      <img src="OSCARPIC.jpeg" alt="Oscar" class="bot-avatar">
+      <div class="bot-message">${smartResponse}</div>
+    </div>`;
+  } catch (error) {
+    const loadingElement = document.getElementById(`loading-${loadingId}`);
+    if (loadingElement) loadingElement.remove();
+
+    console.error("❌ שגיאה:", error);
+    showError(error);
+  }
+
+  convo.scrollTop = convo.scrollHeight;
+}
