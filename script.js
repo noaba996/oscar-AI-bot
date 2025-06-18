@@ -98,7 +98,7 @@ async function loadMoviesDatabase() {
   }
 }
 
-// עדכון זיכרון השיחה
+// עדכון זיכרון השיחה עם מגדר
 let conversationMemory = {
   lastGenres: [],
   lastMoods: [],
@@ -107,6 +107,7 @@ let conversationMemory = {
   lastQuestion: null,
   userPreferences: {
     age: null,
+    gender: null,
     duration: null,
     favoriteActors: [],
     favoriteDirectors: []
@@ -155,7 +156,10 @@ const interactiveQuestions = [
       { text: "🔍 מתח", value: "מתח" },
       { text: "🚀 מדע בדיוני", value: "מדע בדיוני" },
       { text: "🧙‍♂️ פנטזיה", value: "פנטזיה" },
-      { text: "🎨 אנימציה", value: "אנימציה" }
+      { text: "🎨 אנימציה", value: "אנימציה" },
+      { text: "📚 תיעודי", value: "תיעודי" },
+      { text: "👑 ביוגרפיה", value: "ביוגרפיה" },
+      { text: "⚔️ היסטוריה", value: "היסטוריה" }
     ]
   },
   {
@@ -186,7 +190,7 @@ const interactiveQuestions = [
   }
 ];
 
-// פונקציה לניתוח טקסט באמצעות Gemini AI
+// פונקציה לניתוח טקסט באמצעות Gemini AI - מתוקנת
 async function analyzeTextWithAI(userMessage, conversationHistory = []) {
   try {
     console.log("🤖 שולח לניתוח ב-Gemini AI:", userMessage);
@@ -204,34 +208,44 @@ ${conversationHistory.slice(-5).map(msg => `${msg.role}: ${msg.content}`).join('
 
 1. **ז'אנרים** - כל דרך להזכיר ז'אנר:
    - ישיר: "אקשן", "קומדיה", "דרמה"
-   - עקיף: "משהו מצחיק" = קומדיה, "משהו מפחיד" = אימה, "משהו רומנטי" = רומנטי
-   - תיאור: "סרט עם הרבה פעולה" = אקשן, "סרט שיגע לי ללב" = דרמה
+   - עקיף: "משהו מצחיק" = קומדיה, "משהו מפחיד" = אימה
+   - תיאור: "סרט עם הרבה פעולה" = אקשן
 
-2. **מצב רוח** - רק אם המשתמש מתאר איך הוא מרגיש עכשיו:
-   - "אני עצוב", "אני בעצב", "רע לי" = עצוב
-   - "אני שמח", "מצב רוח טוב", "מעולה" = שמח
-   - "בא לי להתרגש", "רוצה לבכות" = מרגש
-   - לא לזהות כמצב רוח: "משהו עצוב" (זה ז'אנר), "סרט שמח" (זה לא מצב רוח)
+2. **גיל** - כל אזכור של גיל:
+   - "34", "אני בן 25", "בת 15", "גיל 30"
+   - כל מספר בין 5-120 = גיל
 
-3. **גיל** - כל אזכור של גיל: "אני בן 25", "בת 15", "גיל 30"
+3. **מגדר** - זהה מגדר לפי השפה:
+   - זכר: "אני אוהב", "בן", "אני מחפש" 
+   - נקבה: "אני אוהבת", "בת", "אני מחפשת"
+   - אם לא ברור = null
 
-4. **פלטפורמות**: "יש לי נטפליקס", "יש יס", "יש הוט", "כן", "לא"
+4. **פלטפורמות**: 
+   - "נטפליקס", "יס", "הוט" = מנוי קיים
+   - "אין לי מנויים", "אין מנויים", "לא" = רשימה ריקה []
+   - "כן" (אם שאלתי על פלטפורמה) = כל הפלטפורמות שהזכרתי
 
-5. **אורך סרט**: "קצר", "מהיר", "ארוך", "יותר משעתיים", "רגיל", "בינוני"
+5. **אורך סרט**: "קצר", "ארוך", "בינוני", "רגיל"
 
-6. **פקודות מיוחדות**: "עוד", "אחרים", "תודה", "ביי", "להתראות"
+6. **פקודות**: "עוד", "אחרים", "תודה", "ביי"
 
-דוגמאות לניתוח נכון:
-- "בא לי משהו מצחיק" → genres: ["קומדיה"], intentType: "giving_new_info"
-- "אני עצוב" → mood: "עצוב", isNewMoodMention: true
-- "אני בן 20 ובא לי אקשן" → ageRange: "17+", genres: ["אקשן"]
-- "יש לי נטפליקס" → platforms: ["נטפליקס"]
-- "עוד המלצות" → command: "אחרים", intentType: "requesting_more"
+זיהוי גיל - דוגמאות:
+- "34" → ageRange: "17+"
+- "אני בן 8" → ageRange: "7+"  
+- "בת 15" → ageRange: "13+"
+- "25" → ageRange: "17+"
+
+זיהוי מגדר - דוגמאות:
+- "אני אוהב אקשן" → gender: "male"
+- "אני אוהבת קומדיה" → gender: "female"
+- "בן 25" → gender: "male"
+- "בת 30" → gender: "female"
 
 אנא נתח את ההודעה וחלץ מידע בפורמט JSON הבא:
 {
   "genres": [רק ז'אנרים שהמשתמש ציין בהודעה הנוכחית],
   "ageRange": "7+" | "13+" | "17+" | null,
+  "gender": "male" | "female" | null,
   "platforms": [רשימת פלטפורמות או רשימה ריקה],
   "duration": "קצר" | "בינוני" | "ארוך" | null,
   "mood": מצב רוח רק אם המשתמש אמר איך הוא מרגיש,
@@ -244,10 +258,9 @@ ${conversationHistory.slice(-5).map(msg => `${msg.role}: ${msg.content}`).join('
 }
 
 כללי זהב:
-- אם המשתמש אומר "משהו מצחיק" - זה ז'אנר קומדיה, לא מצב רוח
-- אם המשתמש אומר "אני עצוב" - זה מצב רוח
+- כל מספר בין 5-120 = גיל
+- זהה מגדר מהשפה (אוהב/אוהבת, בן/בת)
 - אם המשתמש נותן מידע חדש - intentType: "giving_new_info"
-- תמיד תן ביטחון גבוה אם הזיהוי ברור
 
 השב רק בפורמט JSON ללא הסבר נוסף.
 `;
@@ -297,12 +310,13 @@ ${conversationHistory.slice(-5).map(msg => `${msg.role}: ${msg.content}`).join('
   }
 }
 
-// פונקציית גיבוי משופרת
+// פונקציית גיבוי משופרת עם זיהוי גיל ומגדר
 function enhancedFallbackAnalysis(text) {
   const lowerText = text.toLowerCase().trim();
   const analysis = {
     genres: [],
     ageRange: null,
+    gender: null,
     platforms: [],
     duration: null,
     mood: null,
@@ -314,97 +328,83 @@ function enhancedFallbackAnalysis(text) {
     intentType: "giving_new_info"
   };
 
-  // זיהוי ז'אנרים - כולל דרכים עקיפות
+  // זיהוי ז'אנרים
   const genrePatterns = {
-    "קומדיה": [
-      "קומדיה", "מצחיק", "comedy", "הומור", "צחוק", "כיפי", "קליל", 
-      "משהו מצחיק", "בא לי לצחוק", "רוצה משהו קליל", "סרט מבדר"
-    ],
-    "אקשן": [
-      "אקשן", "פעולה", "action", "קרב", "מרדף", 
-      "משהו עם פעולה", "הרבה אקשן", "סרט פעולה"
-    ],
-    "דרמה": [
-      "דרמה", "רגשי", "drama", "מרגש", "רציני", 
-      "משהו רגשי", "סרט שיגע ללב", "סרט עמוק"
-    ],
-    "רומנטי": [
-      "רומנטי", "אהבה", "romance", "זוגי", "רומנטיקה", 
-      "משהו רומנטי", "סרט אהבה", "משהו מתוק"
-    ],
-    "אימה": [
-      "אימה", "מפחיד", "horror", "מבעית", "מצמרר", 
-      "משהו מפחיד", "בא לי להפחד", "סרט אימה"
-    ],
-    "מתח": [
-      "מתח", "thriller", "מותחן", "ריגול", 
-      "משהו מותח", "סרט מתח"
-    ]
+    "קומדיה": ["קומדיה", "מצחיק", "comedy", "משהו מצחיק", "בא לי לצחוק"],
+    "אקשן": ["אקשן", "פעולה", "action", "משהו עם פעולה"],
+    "דרמה": ["דרמה", "רגשי", "drama", "משהו רגשי"],
+    "רומנטי": ["רומנטי", "אהבה", "romance", "משהו רומנטי"],
+    "אימה": ["אימה", "מפחיד", "horror", "משהו מפחיד"],
+    "מתח": ["מתח", "thriller", "מותחן", "משהו מותח"]
   };
 
-  // זיהוי ז'אנרים
   for (const [genre, patterns] of Object.entries(genrePatterns)) {
     if (patterns.some(pattern => lowerText.includes(pattern))) {
       analysis.genres.push(genre);
     }
   }
 
-  // זיהוי מצב רוח - רק אם המשתמש מתאר איך הוא מרגיש
-  const moodPatterns = {
-    "עצוב": ["אני עצוב", "אני בעצב", "רע לי", "אני מרגיש רע", "מצב רוח רע"],
-    "שמח": ["אני שמח", "מצב רוח טוב", "אני מעולה", "אני מרגיש טוב", "אני בכיף"],
-    "מרגש": ["בא לי להתרגש", "רוצה לבכות", "אני רגשי היום"],
-    "רומנטי": ["אני רומנטי היום", "בא לי רומנטיקה"]
-  };
+  // זיהוי מגדר מהשפה
+  if (lowerText.includes("אוהב") || lowerText.includes("בן") || lowerText.includes("מחפש")) {
+    analysis.gender = "male";
+  } else if (lowerText.includes("אוהבת") || lowerText.includes("בת") || lowerText.includes("מחפשת")) {
+    analysis.gender = "female";
+  }
 
-  for (const [mood, patterns] of Object.entries(moodPatterns)) {
-    if (patterns.some(pattern => lowerText.includes(pattern))) {
-      analysis.mood = mood;
-      analysis.isNewMoodMention = true;
-      break;
+  // זיהוי גיל - משופר
+  const agePatterns = [
+    /^(\d+)$/, // רק מספר
+    /(?:אני )?בן\s*(\d+)/, // בן X
+    /(?:אני )?בת\s*(\d+)/, // בת X
+    /גיל\s*(\d+)/, // גיל X
+    /אני\s*(\d+)/ // אני X
+  ];
+
+  for (const pattern of agePatterns) {
+    const match = lowerText.match(pattern);
+    if (match) {
+      const age = parseInt(match[1]);
+      if (!isNaN(age) && age >= 5 && age <= 120) {
+        if (age >= 7 && age <= 12) analysis.ageRange = "7+";
+        else if (age >= 13 && age <= 16) analysis.ageRange = "13+";
+        else if (age >= 17) analysis.ageRange = "17+";
+        
+        // אם זיהינו גיל מ"בן/בת" - גם נזהה מגדר
+        if (match[0].includes("בן")) analysis.gender = "male";
+        if (match[0].includes("בת")) analysis.gender = "female";
+        break;
+      }
     }
   }
 
   // זיהוי פלטפורמות
-  if (lowerText.includes("נטפליקס") || lowerText.includes("netflix")) {
-    analysis.platforms.push("נטפליקס");
-  }
-  if (lowerText.includes("יס") || lowerText.includes("yes")) {
-    analysis.platforms.push("יס");
-  }
-  if (lowerText.includes("הוט") || lowerText.includes("hot")) {
-    analysis.platforms.push("הוט");
+  if (lowerText.includes("נטפליקס")) analysis.platforms.push("נטפליקס");
+  if (lowerText.includes("יס")) analysis.platforms.push("יס");
+  if (lowerText.includes("הוט")) analysis.platforms.push("הוט");
+  
+  // זיהוי "אין מנויים" - רשימה ריקה
+  if (lowerText.includes("אין לי מנויים") || lowerText.includes("אין מנויים")) {
+    analysis.platforms = [];
   }
 
   // זיהוי פקודות
-  if (["עוד", "אחרים", "נוספים", "הבאים"].some(cmd => lowerText.includes(cmd))) {
+  if (["עוד", "אחרים", "נוספים"].some(cmd => lowerText.includes(cmd))) {
     analysis.command = "אחרים";
     analysis.intentType = "requesting_more";
   } else if (["תודה", "thanks"].some(cmd => lowerText.includes(cmd))) {
     analysis.command = "תודה";
-  } else if (["ביי", "להתראות", "bye"].some(cmd => lowerText.includes(cmd))) {
+  } else if (["ביי", "להתראות"].some(cmd => lowerText.includes(cmd))) {
     analysis.command = "סיום";
   }
 
-  // זיהוי גיל
-  const ageMatch = lowerText.match(/(?:בן|בת|גיל|אני)\s*(\d+)/);
-  if (ageMatch) {
-    const age = parseInt(ageMatch[1]);
-    if (age >= 7 && age <= 12) analysis.ageRange = "7+";
-    else if (age >= 13 && age <= 16) analysis.ageRange = "13+";
-    else if (age >= 17) analysis.ageRange = "17+";
-  }
-
   // זיהוי אורך
-  if (["קצר", "מהיר", "לא הרבה זמן"].some(dur => lowerText.includes(dur))) {
+  if (["קצר", "מהיר"].some(dur => lowerText.includes(dur))) {
     analysis.duration = "קצר";
   } else if (["ארוך", "יותר משעתיים"].some(dur => lowerText.includes(dur))) {
     analysis.duration = "ארוך";
   } else if (["בינוני", "רגיל"].some(dur => lowerText.includes(dur))) {
     analysis.duration = "בינוני";
   }
-
-  analysis.extractedInfo = `זוהו: ${analysis.genres.length} ז'אנרים, ${analysis.mood ? 'מצב רוח' : 'ללא מצב רוח'}, ${analysis.platforms.length} פלטפורמות`;
 
   return analysis;
 }
@@ -564,6 +564,7 @@ function resetConversationMemory() {
     lastQuestion: null,
     userPreferences: {
       age: null,
+      gender: null,
       duration: null,
       favoriteActors: [],
       favoriteDirectors: []
@@ -583,6 +584,72 @@ function resetConversationMemory() {
       welcomeGiven: false
     }
   };
+}
+
+// פונקציה ליצירת הודעות מותאמות אישית
+function createPersonalizedResponse(analysis, infoType) {
+  const gender = conversationMemory.userPreferences.gender || analysis.gender;
+  const isFemale = gender === "female";
+  
+  const responses = {
+    genres: {
+      male: [
+        `נהדר! ${analysis.genres.join(' ו')} זה בחירה מעולה! 🎬`,
+        `אני רואה שאתה אוהב ${analysis.genres.join(' ו')} - יש לי המלצות מדהימות! 🍿`,
+        `מושלם! ${analysis.genres.join(' ו')} זה ז'אנר שאני מכיר טוב 😊`
+      ],
+      female: [
+        `נהדר! ${analysis.genres.join(' ו')} זה בחירה מעולה! 🎬`,
+        `אני רואה שאת אוהבת ${analysis.genres.join(' ו')} - יש לי המלצות מדהימות! 🍿`,
+        `מושלם! ${analysis.genres.join(' ו')} זה ז'אנר שאני מכיר טוב 😊`
+      ]
+    },
+    age: {
+      male: [
+        "תודה על המידע! עכשיו אני יכול להתאים לך סרטים מתאימים לגיל 👍",
+        "מעולה! זה יעזור לי לבחור סרטים שמתאימים בדיוק בשבילך 🎯",
+        "נהדר! עכשיו אני יודע איזה סרטים יהיו מושלמים עבורך 🌟"
+      ],
+      female: [
+        "תודה על המידע! עכשיו אני יכול להתאים לך סרטים מתאימים לגיל 👍",
+        "מעולה! זה יעזור לי לבחור סרטים שמתאימים בדיוק בשבילך 🎯",
+        "נהדר! עכשיו אני יודע איזה סרטים יהיו מושלמים עבורך 🌟"
+      ]
+    },
+    platforms: {
+      male: [
+        "אחלה! עכשיו אני יודע איפה אתה יכול לצפות 📺",
+        "נהדר! זה יעזור לי למצוא סרטים זמינים בשבילך 🎮",
+        "מושלם! עכשיו אני יכול להמליץ לך רק על סרטים שתוכל לראות 👌"
+      ],
+      female: [
+        "אחלה! עכשיו אני יודע איפה את יכולה לצפות 📺",
+        "נהדר! זה יעזור לי למצוא סרטים זמינים בשבילך 🎮",
+        "מושלם! עכשיו אני יכול להמליץ לך רק על סרטים שתוכלי לראות 👌"
+      ]
+    },
+    duration: {
+      male: [
+        "ברור! אני אתאים את ההמלצות לזמן שיש לך ⏰",
+        "מעולה! אני אמצא לך סרטים באורך המתאים 🕒",
+        "נהדר! עכשיו אני יכול להמליץ על סרטים שמתאימים לזמן שלך ⌚"
+      ],
+      female: [
+        "ברור! אני אתאים את ההמלצות לזמן שיש לך ⏰",
+        "מעולה! אני אמצא לך סרטים באורך המתאים 🕒",
+        "נהדר! עכשיו אני יכול להמליץ על סרטים שמתאימים לזמן שלך ⌚"
+      ]
+    }
+  };
+  
+  const genderKey = isFemale ? "female" : "male";
+  const typeResponses = responses[infoType]?.[genderKey] || responses[infoType]?.male || [];
+  
+  if (typeResponses.length > 0) {
+    return typeResponses[Math.floor(Math.random() * typeResponses.length)];
+  }
+  
+  return isFemale ? "מעולה! " : "מעולה! ";
 }
 
 // פונקציה משופרת ליצירת תשובה חכמה
@@ -665,62 +732,76 @@ function handleMoreRecommendations(movies) {
   }
 }
 
-// פונקציה לטיפול במידע חדש מהמשתמש
+// פונקציה לטיפול במידע חדש מהמשתמש - מתוקנת עם תגובות מותאמות
 function handleNewInfo(analysis, movies) {
   let response = "";
   let newInfoAdded = false;
+  let responseType = null;
+  
+  // שמירת מגדר אם זוהה
+  if (analysis.gender) {
+    conversationMemory.userPreferences.gender = analysis.gender;
+  }
   
   // עדכון המידע בזיכרון
   if (analysis.genres && analysis.genres.length > 0) {
     conversationMemory.lastGenres = analysis.genres;
     conversationMemory.collectedInfo.genres = true;
     newInfoAdded = true;
+    responseType = "genres";
     console.log("✅ זוהו ז'אנרים:", analysis.genres);
   }
 
-  // תגובה למצב רוח רק בפעם הראשונה!
-  if (analysis.mood && analysis.isNewMoodMention && !conversationMemory.mentionedTopics.mood) {
-    conversationMemory.lastMoods = [analysis.mood];
-    conversationMemory.mentionedTopics.mood = true;
+  if (analysis.ageRange) {
+    conversationMemory.userPreferences.age = analysis.ageRange;
+    conversationMemory.collectedInfo.age = true;
     newInfoAdded = true;
-    
-    // תגובה למצב רוח רק בפעם הראשונה
-    switch (analysis.mood) {
-      case "עצוב":
-        response += "🥺 מצטער לשמוע שאתה מרגיש כך. בוא נבחר סרט שיעלה לך חיוך! ";
-        break;
-      case "שמח":
-        response += "🎉 אין כמו מצב רוח טוב! בוא נמצא סרט שישמור על זה! ";
-        break;
-      case "מרגש":
-        response += "💖 נראה שאתה במצב לסרט שיגע בלב. יש לי בדיוק מה שצריך! ";
-        break;
-      case "רומנטי":
-        response += "💕 מושלם לערב רומנטי! ";
-        break;
-    }
+    responseType = "age";
   }
   
   if (analysis.platforms && analysis.platforms.length > 0) {
     conversationMemory.lastPlatforms = analysis.platforms;
     conversationMemory.collectedInfo.platforms = true;
     newInfoAdded = true;
+    responseType = "platforms";
   } else if (analysis.platforms && analysis.platforms.length === 0) {
     conversationMemory.lastPlatforms = [];
     conversationMemory.collectedInfo.platforms = true;
     newInfoAdded = true;
-  }
-  
-  if (analysis.ageRange) {
-    conversationMemory.userPreferences.age = analysis.ageRange;
-    conversationMemory.collectedInfo.age = true;
-    newInfoAdded = true;
+    responseType = "platforms";
   }
   
   if (analysis.duration) {
     conversationMemory.userPreferences.duration = analysis.duration;
     conversationMemory.collectedInfo.duration = true;
     newInfoAdded = true;
+    responseType = "duration";
+  }
+
+  // תגובה למצב רוח רק בפעם הראשונה
+  if (analysis.mood && analysis.isNewMoodMention && !conversationMemory.mentionedTopics.mood) {
+    conversationMemory.lastMoods = [analysis.mood];
+    conversationMemory.mentionedTopics.mood = true;
+    
+    const isFemale = conversationMemory.userPreferences.gender === "female";
+    switch (analysis.mood) {
+      case "עצוב":
+        response += isFemale ? 
+          "🥺 מצטער לשמוע שאת מרגישה כך. בואי נבחר סרט שיעלה לך חיוך! " :
+          "🥺 מצטער לשמוע שאתה מרגיש כך. בוא נבחר סרט שיעלה לך חיוך! ";
+        break;
+      case "שמח":
+        response += isFemale ?
+          "🎉 אין כמו מצב רוח טוב! בואי נמצא סרט שישמור על זה! " :
+          "🎉 אין כמו מצב רוח טוב! בוא נמצא סרט שישמור על זה! ";
+        break;
+      case "מרגש":
+        response += "💖 נראה שיש לך מצב לסרט שיגע בלב. יש לי בדיוק מה שצריך! ";
+        break;
+      case "רומנטי":
+        response += "💕 מושלם לערב רומנטי! ";
+        break;
+    }
   }
 
   // אם יש מספיק מידע - תן המלצות
@@ -730,9 +811,9 @@ function handleNewInfo(analysis, movies) {
   if (allRequiredInfoCollected) {
     return generateRecommendations(movies, response);
   } else {
-    // שאל על המידע החסר - אבל תן מענה חיובי קודם
-    if (newInfoAdded && response === "") {
-      response += "מעולה! ";
+    // תגובה מותאמת אישית למידע שנוסף
+    if (newInfoAdded && responseType && response === "") {
+      response += createPersonalizedResponse(analysis, responseType) + " ";
     }
     return response + askForMissingInfo();
   }
