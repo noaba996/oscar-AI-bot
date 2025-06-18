@@ -147,59 +147,7 @@ async function loadMoviesDatabase() {
   }
 }
 
-// 📚 מאגר מילות מפתח להדרכת ה-AI
-const keywordsForAI = {
-  genres: {
-    "אקשן": ["אקשן", "פעולה", "action", "קרב", "מרדף", "הרפתקה"],
-    "קומדיה": ["קומדיה", "מצחיק", "comedy", "הומור", "צחוק", "מבדר", "קל", "קליל", "כיפי"],
-    "דרמה": ["דרמה", "רגשי", "drama", "מרגש", "עצוב", "רציני", "נוגע ללב", "דרמטי"],
-    "רומנטי": ["רומנטי", "אהבה", "romance", "זוגי", "רומנטיקה", "מתוק", "עדין"],
-    "אימה": ["אימה", "מפחיד", "horror", "מבעית", "מצמרר", "דמים"],
-    "מתח": ["מתח", "thriller", "מותחן", "ריגול"],
-    "מדע בדיוני": ["מדע בדיוני", "sci-fi", "עתידני", "חלל", "רובוטים", "פנטזיה", "עתיד", "טכנולוגיה"],
-    "פנטזיה": ["פנטזיה", "קסם", "דרקונים", "עולמות אחרים", "כישוף", "אגדה"],
-    "אנימציה": ["אנימציה", "מצויר", "ילדים", "פיקסאר", "דיסני", "אנימה", "מנגה"],
-    "תיעודי": ["תיעודי", "דוקומנטרי", "אמת", "מציאות", "היסטוריה", "טבע", "ביוגרפיה"],
-    "ביוגרפיה": ["ביוגרפיה", "סיפור אמיתי", "חיים של", "אישיות", "היסטורי", "אדם אמיתי"],
-    "היסטוריה": ["היסטוריה", "תקופה עתיקה", "עבר", "מלכים", "היסטורי"],
-    "מוזיקלי": ["מוזיקלי", "שירים", "ריקוד", "מחזמר", "מוזיקה", "קליפים"],
-    "מערבון": ["מערבון", "קאובוי", "פראי מערב", "סוסים", "אקדחים"],
-    "פשע": ["פשע", "משטרה", "גניבה", "חוק", "פושעים", "בלש", "חקירה"],
-    "מסתורין": ["מסתורין", "תעלומה", "בלש", "חקירה", "לא ברור", "חידה"],
-    "משפחה": ["משפחה", "הורים", "אחים", "כיף לכל המשפחה"],
-    "ספורט": ["ספורט", "כדורגל", "כדורסל", "אולימפיאדה", "תחרות", "נצחון"],
-    "מלחמה": ["מלחמה", "קרב", "חיילים", "צבא", "היסטורי", "גבורה"]
-  },
-  moods: {
-    "שמח": ["שמח", "מבדר", "קליל", "חיובי", "מאושר", "טוב לי", "מעולה", "מצוין", "נהדר", "כיפי"],
-    "מרומם": ["מרומם", "מעורר השראה", "מוטיבציה", "הצלחה", "מעודד", "מחזק", "מעצים", "אופטימי"],
-    "רגוע": ["רגוע", "נינוח", "שלווה", "מרגיע", "שליו", "מרגוע", "מנוחה", "שקט", "רפוי"],
-    "עצוב": ["עצוב", "מעוצבן", "כועס", "עצבני", "מתסכל", "מעצבן", "מרגיז", "מעיק", "קשה", "רע לי"],
-    "מרגש": ["מרגש", "נוגע ללב", "רגשי", "נוגע", "סוחף", "עוצמתי", "מותח"],
-    "מפחיד": ["מפחיד", "מלחיץ", "מסתורי", "אימה", "מטריד", "מבהיל", "פחד", "בעתה", "חרדה"],
-    "רומנטי": ["רומנטי", "אהבה", "זוגי", "רומנטיקה", "זוגיות", "מתוק", "דביק", "נשיקה"],
-    "נוסטלגי": ["נוסטלגי", "זיכרונות", "ילדות", "עבר", "ישן", "קלאסי", "פעם", "זכרון", "עתיק"],
-    "משעשע": ["משעשע", "מצחיק", "מבדר", "קליל", "הומור", "צחוק", "שעשוע", "בדיחה"]
-  },
-  platforms: {
-    "נטפליקס": ["נטפליקס", "netflix"],
-    "יס": ["יס", "yes"],
-    "הוט": ["הוט", "hot"]
-  },
-  duration: {
-    "קצר": ["קצר", "מהיר", "קליל", "קצת זמן", "לא יותר מידי", "משהו קטן", "עד שעה וחצי"],
-    "בינוני": ["בינוני", "רגיל", "סטנדרטי", "נורמלי", "כשעתיים", "לא יותר מדי ארוך"],
-    "ארוך": ["ארוך", "יותר משעתיים", "סרט ארוך", "אין לי בעיה עם זמן"]
-  },
-  commands: {
-    "אחרים": ["אחרים", "נוספים", "עוד", "הבאים", "אחר"],
-    "איפוס": ["התחל שיחה חדשה", "אפס", "חדש", "התחל מחדש"],
-    "תודה": ["תודה", "תודה רבה", "תודות", "thanks", "thank you", "אני מרוצה", "מצאתי", "זה מה שחיפשתי"],
-    "סיום": ["ביי", "להתראות", "עד הפעם הבאה", "bye", "goodbye", "נתראה", "תודה ושלום", "זהו", "סיימנו"]
-  }
-};
-
-// עדכון זיכרון השיחה
+// עדכון זיכרון השיחה - עם מעקב אחרי נושאים שהוזכרו
 let conversationMemory = {
   lastGenres: [],
   lastMoods: [],
@@ -221,7 +169,12 @@ let conversationMemory = {
     platforms: false
   },
   recommendationOffset: 0,
-  conversationHistory: [] // היסטוריית השיחה ל-AI
+  conversationHistory: [],
+  // הוספה חדשה - מעקב אחרי מה כבר הוזכר
+  mentionedTopics: {
+    mood: false,
+    welcomeGiven: false
+  }
 };
 
 const goodbyeMessages = [
@@ -291,43 +244,54 @@ const interactiveQuestions = [
   }
 ];
 
-// 🤖 פונקציה לניתוח טקסט באמצעות Gemini AI
+// 🤖 פונקציה לניתוח טקסט באמצעות Gemini AI - מעודכנת וחכמה יותר
 async function analyzeTextWithAI(userMessage, conversationHistory = []) {
   try {
     console.log("🤖 שולח לניתוח ב-Gemini AI:", userMessage);
     
-    // בניית הפרומפט ל-AI
+    // פרומפט משופר שמבין הקשר ומונע חזרות
     const prompt = `
 אתה עוזר חכם לבוט המלצות סרטים בעברית בשם "אוסקר". 
-המשימה שלך היא לנתח הודעות של משתמשים ולחלץ מידע רלוונטי להמלצות סרטים.
+אתה צריך להיות טבעי, חכם ולהבין הקשר של השיחה.
 
 היסטוריית השיחה הקודמת:
 ${conversationHistory.slice(-5).map(msg => `${msg.role}: ${msg.content}`).join('\n')}
 
 הודעה נוכחית של המשתמש: "${userMessage}"
 
+הוראות חשובות:
+1. אל תחזור על אותן תגובות - אם כבר דיברנו על מצב רוח, אל תזכיר את זה שוב
+2. תן תשובות טבעיות ומותאמות להקשר הספציפי
+3. זהה מה המשתמש באמת רוצה - האם הוא מוסיף מידע חדש או מבקש המלצות
+4. אם המשתמש אומר "עוד" או "אחרים" - זה אומר שהוא רוצה המלצות נוספות עם אותם קריטריונים
+
 אנא נתח את ההודעה וחלץ מידע בפורמט JSON הבא:
 {
-  "genres": [רשימת ז'אנרים בעברית, למשל: "אקשן", "קומדיה"],
-  "ageRange": "7+" | "13+" | "17+" | null,
-  "platforms": [רשימת פלטפורמות: "נטפליקס", "יס", "הוט"] | [],
-  "duration": "קצר" | "בינוני" | "ארוך" | null,
-  "mood": מצב רוח של המשתמש כמו "שמח", "עצוב", "מרגש" וכו' | null,
-  "confidence": מספר בין 0-1 שמייצג כמה אתה בטוח בניתוח,
-  "missingInfo": [רשימה של מה חסר: "genres", "age", "duration", "platforms"],
-  "extractedInfo": "תקציר קצר של מה שהבנת מהמשתמש",
-  "command": "אחרים" | "איפוס" | "תודה" | "סיום" | null
+  "genres": [רשימת ז'אנרים שהמשתמש ציין עכשיו - רק אם הוא הזכיר אותם בהודעה הנוכחית],
+  "ageRange": "7+" | "13+" | "17+" | null (רק אם ציין גיל עכשיו),
+  "platforms": [רשימת פלטפורמות שהמשתמש ציין עכשיו],
+  "duration": "קצר" | "בינוני" | "ארוך" | null (רק אם ציין אורך עכשיו),
+  "mood": מצב רוח שהמשתמש הביע עכשיו - רק אם הוא באמת אמר איך הוא מרגיש עכשיו,
+  "isNewMoodMention": true/false - האם זו הפעם הראשונה שהוא מזכיר את מצב הרוח הזה,
+  "confidence": מספר בין 0-1,
+  "missingInfo": [מה עדיין חסר למען המלצות טובות],
+  "extractedInfo": "מה המשתמש אמר במילים שלך",
+  "command": "אחרים" | "איפוס" | "תודה" | "סיום" | null,
+  "intentType": "giving_new_info" | "asking_for_recommendations" | "requesting_more" | "casual_chat"
 }
 
-דוגמאות לז'אנרים: אקשן, קומדיה, דרמה, רומנטי, אימה, מתח, מדע בדיוני, פנטזיה, אנימציה, תיעודי, ביוגרפיה, היסטוריה, מוזיקלי, מערבון, פשע, מסתורין, משפחה, ספורט, מלחמה
+דוגמאות:
+- אם המשתמש אומר "אני אוהב אקשן" - זה giving_new_info
+- אם הוא אומר "תמליץ לי על סרט" - זה asking_for_recommendations  
+- אם הוא אומר "עוד" או "אחרים" - זה requesting_more
+- אם הוא אומר "היי איך שלומך" - זה casual_chat
 
-חשוב:
-- אם המשתמש לא ציין משהו בבירור, השאר null
-- התעלם משגיאות כתיב והבן את הכוונה
-- אם המשתמש אומר "אקשן" או "פעולה" - זה אותו ז'אנר
-- אם המשתמש אומר "כן", "יש לי", "נטפליקס" - זה אומר שיש לו את הפלטפורמה
-- אם המשתמש אומר "לא", "אין לי" - זה אומר שאין לו מנויים
-- גילאים: 7-12 = "7+", 13-16 = "13+", 17+ = "17+"
+זהה בחוכמה:
+- ז'אנרים: אקשן, קומדיה, דרמה, רומנטי, אימה, מתח, מדע בדיוני, פנטזיה, אנימציה, תיעודי, ביוגרפיה, היסטוריה וכו'
+- גילאים: כל מספר או תיאור גיל
+- פלטפורמות: נטפליקס, יס, הוט
+- אורך: קצר/מהיר/פחות מ... = קצר, בינוני/רגיל = בינוני, ארוך/יותר מ... = ארוך
+- מצבי רוח: שמח, עצוב, מרגש, רומנטי וכו' - רק אם הוא באמת מתאר איך הוא מרגיש
 
 השב רק בפורמט JSON, ללא הסבר נוסף.
 `;
@@ -357,9 +321,7 @@ ${conversationHistory.slice(-5).map(msg => `${msg.role}: ${msg.content}`).join('
     
     console.log("🤖 תשובת AI גולמית:", aiResponse);
     
-    // ניסיון לפרסר את ה-JSON
     try {
-      // ניקוי התשובה מסימנים מיותרים
       const cleanResponse = aiResponse.replace(/```json|```/g, '').trim();
       const parsedResponse = JSON.parse(cleanResponse);
       
@@ -379,7 +341,7 @@ ${conversationHistory.slice(-5).map(msg => `${msg.role}: ${msg.content}`).join('
   }
 }
 
-// פונקציית גיבוי לניתוח מקומי (הקוד המקורי)
+// פונקציית גיבוי לניתוח מקומי (הקוד המקורי) - עודכנה לתמיכה בשדות החדשים
 function fallbackAnalysis(text) {
   const lowerText = text.toLowerCase().trim();
   const analysis = {
@@ -388,100 +350,50 @@ function fallbackAnalysis(text) {
     platforms: [],
     duration: null,
     mood: null,
-    confidence: 0.7, // בטחון בינוני
+    isNewMoodMention: false,
+    confidence: 0.7,
     missingInfo: [],
     extractedInfo: "ניתוח מקומי של הטקסט",
-    command: null
+    command: null,
+    intentType: "giving_new_info"
   };
 
   // זיהוי פקודות
-  for (const [command, words] of Object.entries(keywordsForAI.commands)) {
-    const wordMatch = words.some(word => {
-      if (command === "סיום") {
-        return lowerText === word || 
-               lowerText.startsWith(word + " ") || 
-               lowerText.endsWith(" " + word) ||
-               lowerText.includes(" " + word + " ");
-      } else {
-        return lowerText.includes(word);
-      }
-    });
+  const commands = {
+    "אחרים": ["אחרים", "נוספים", "עוד", "הבאים", "אחר"],
+    "איפוס": ["התחל שיחה חדשה", "אפס", "חדש", "התחל מחדש"],
+    "תודה": ["תודה", "תודה רבה", "תודות", "thanks", "thank you"],
+    "סיום": ["ביי", "להתראות", "עד הפעם הבאה", "bye", "goodbye"]
+  };
 
-    if (wordMatch) {
+  for (const [command, words] of Object.entries(commands)) {
+    if (words.some(word => lowerText.includes(word))) {
       analysis.command = command;
+      if (command === "אחרים") analysis.intentType = "requesting_more";
       break;
     }
   }
 
-  // זיהוי ז'אנרים
-  for (const [genre, words] of Object.entries(keywordsForAI.genres)) {
+  // זיהוי ז'אנרים פשוט
+  const genreKeywords = {
+    "אקשן": ["אקשן", "פעולה", "action"],
+    "קומדיה": ["קומדיה", "מצחיק", "comedy"],
+    "דרמה": ["דרמה", "רגשי", "drama"],
+    "רומנטי": ["רומנטי", "אהבה", "romance"]
+  };
+
+  for (const [genre, words] of Object.entries(genreKeywords)) {
     if (words.some(word => lowerText.includes(word))) {
       analysis.genres.push(genre);
     }
   }
 
-  // זיהוי מצבי רוח
-  for (const [mood, words] of Object.entries(keywordsForAI.moods)) {
-    if (words.some(word => lowerText.includes(word))) {
-      analysis.mood = mood;
-      break; // רק מצב רוח אחד
-    }
+  // זיהוי כוונה
+  if (lowerText.includes("המליץ") || lowerText.includes("תן לי") || lowerText.includes("רוצה סרט")) {
+    analysis.intentType = "asking_for_recommendations";
+  } else if (lowerText.includes("היי") || lowerText.includes("שלום")) {
+    analysis.intentType = "casual_chat";
   }
-
-  // זיהוי פלטפורמות
-  const platformKeywords = {
-    "נטפליקס": ["נטפליקס", "netflix", "כן", "יש", "יש לי"],
-    "יס": ["יס", "yes", "כן", "יש", "יש לי"],
-    "הוט": ["הוט", "hot", "כן", "יש", "יש לי"]
-  };
-
-  for (const [platform, keywords] of Object.entries(platformKeywords)) {
-    if (keywords.some(keyword => lowerText.includes(keyword) || lowerText === keyword)) {
-      analysis.platforms.push(platform);
-    }
-  }
-
-  const negativeKeywords = ["לא", "אין", "אין לי", "אף אחד"];
-  if (negativeKeywords.some(keyword => lowerText === keyword || lowerText.includes(keyword))) {
-    analysis.platforms = [];
-  }
-
-  // זיהוי אורך סרט
-  for (const [duration, words] of Object.entries(keywordsForAI.duration)) {
-    if (words.some(word => lowerText.includes(word))) {
-      analysis.duration = duration;
-      break;
-    }
-  }
-
-  // זיהוי גיל
-  const agePatterns = [
-    /(\d+)\s*(?:שנה|שנים|גיל)/,
-    /בן\s*(\d+)/,
-    /בת\s*(\d+)/,
-    /אני\s*(\d+)/,
-    /(\d+)\s*אני/,
-    /^(\d+)$/
-  ];
-
-  for (const pattern of agePatterns) {
-    const match = lowerText.match(pattern);
-    if (match) {
-      const age = parseInt(match[1]);
-      if (!isNaN(age)) {
-        if (age >= 7 && age <= 12) analysis.ageRange = "7+";
-        else if (age >= 13 && age <= 16) analysis.ageRange = "13+";
-        else if (age >= 17) analysis.ageRange = "17+";
-        break;
-      }
-    }
-  }
-
-  // בדיקת מידע חסר
-  if (analysis.genres.length === 0) analysis.missingInfo.push("genres");
-  if (!analysis.ageRange) analysis.missingInfo.push("age");
-  if (!analysis.duration) analysis.missingInfo.push("duration");
-  if (analysis.platforms.length === 0) analysis.missingInfo.push("platforms");
 
   return analysis;
 }
@@ -490,16 +402,13 @@ function fallbackAnalysis(text) {
 async function analyzeText(text) {
   console.log("🔍 מתחיל ניתוח טקסט:", text);
   
-  // שליחה ל-AI לניתוח
   const aiAnalysis = await analyzeTextWithAI(text, conversationMemory.conversationHistory);
   
-  // הוספת ההודעה להיסטוריה
   conversationMemory.conversationHistory.push({
     role: "user",
     content: text
   });
   
-  // שמירה רק של 10 ההודעות האחרונות
   if (conversationMemory.conversationHistory.length > 10) {
     conversationMemory.conversationHistory = conversationMemory.conversationHistory.slice(-10);
   }
@@ -537,9 +446,8 @@ function isUnclearText(text) {
   return false;
 }
 
-// פונקציה לבדיקת הבנה של תשובה - עודכנה לעבוד עם AI
+// פונקציה לבדיקת הבנה של תשובה
 function checkUnderstanding(message, questionId) {
-  // אם ה-AI זיהה פקודה ברורה, זה נחשב כהבנה
   return !isUnclearText(message);
 }
 
@@ -561,31 +469,7 @@ function getNextQuestion() {
   return null;
 }
 
-// 🔧 פונקציה ליצירת כפתורים אינטראקטיביים - מתוקנת
-function createInteractiveButtons(question) {
-  if (!question.hasButtons) return '';
-  
-  const buttonId = `buttons-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-  let buttonsHTML = `<div class="interactive-buttons" id="${buttonId}">`;
-  
-  question.buttons.forEach((button, index) => {
-    // שימוש ב-onclick עם escape נכון
-    const escapedValue = button.value.replace(/'/g, "\\'");
-    buttonsHTML += `
-      <button class="choice-button" 
-              onclick="window.handleButtonClick('${escapedValue}', '${buttonId}')"
-              data-value="${button.value}"
-              data-container-id="${buttonId}">
-        ${button.text}
-      </button>
-    `;
-  });
-  
-  buttonsHTML += '</div>';
-  return buttonsHTML;
-}
-
-// 🔧 פונקציה חלופית עם event listeners
+// פונקציה ליצירת כפתורים אינטראקטיביים
 function createInteractiveButtonsWithEvents(question) {
   if (!question.hasButtons) return '';
   
@@ -606,7 +490,6 @@ function createInteractiveButtonsWithEvents(question) {
   
   buttonsHTML += '</div>';
   
-  // הוספת event listeners אחרי שהכפתורים נוספו ל-DOM
   setTimeout(() => {
     question.buttons.forEach((button, index) => {
       const btnId = `btn-${buttonId}-${index}`;
@@ -615,18 +498,15 @@ function createInteractiveButtonsWithEvents(question) {
         btnElement.addEventListener('click', async function() {
           console.log("🔘 כפתור נלחץ (event listener):", button.value);
           
-          // הסרת הכפתורים לאחר הבחירה
           const buttonsContainer = document.getElementById(buttonId);
           if (buttonsContainer) {
             buttonsContainer.remove();
             console.log("✅ כפתורים הוסרו");
           }
           
-          // הוספת תשובת המשתמש לשיחה
           const convo = document.getElementById("conversation");
           convo.innerHTML += `<div class='bubble user'>${button.value}</div>`;
           
-          // עיבוד התשובה - עכשיו בתוך async function
           const loadingId = Date.now();
           convo.innerHTML += `<div class='bubble bot' id='loading-${loadingId}'>
             <img src="OSCARPIC.jpeg" alt="Oscar" class="bot-avatar">
@@ -660,66 +540,6 @@ function createInteractiveButtonsWithEvents(question) {
   return buttonsHTML;
 }
 
-// 🔧 פונקציה לטיפול בלחיצה על כפתור - מתוקנת
-function handleButtonClick(value, buttonId) {
-  console.log("🔘 כפתור נלחץ:", value, "ID:", buttonId);
-  
-  // הסרת הכפתורים לאחר הבחירה
-  const buttonsContainer = document.getElementById(buttonId);
-  if (buttonsContainer) {
-    buttonsContainer.remove();
-    console.log("✅ כפתורים הוסרו");
-  } else {
-    console.error("❌ לא נמצא מכיל כפתורים עם ID:", buttonId);
-  }
-  
-  // הוספת תשובת המשתמש לשיחה
-  const convo = document.getElementById("conversation");
-  convo.innerHTML += `<div class='bubble user'>${value}</div>`;
-  
-  // עיבוד התשובה - כעת קוראת ל-async function
-  processUserChoice(value).catch(error => {
-    console.error("❌ שגיאה בעיבוד בחירת המשתמש:", error);
-    showError(error);
-  });
-  
-  convo.scrollTop = convo.scrollHeight;
-}
-
-// הפיכת הפונקציה לגלובלית
-window.handleButtonClick = handleButtonClick;
-
-// פונקציה לעיבוד בחירת המשתמש
-async function processUserChoice(choice) {
-  const convo = document.getElementById("conversation");
-  const loadingId = Date.now();
-  
-  convo.innerHTML += `<div class='bubble bot' id='loading-${loadingId}'>
-    <img src="OSCARPIC.jpeg" alt="Oscar" class="bot-avatar">
-    <div class="bot-message">🤖 מעבד את ההודעה שלך באמצעות AI...</div>
-  </div>`;
-
-  try {
-    const movies = await loadMoviesDatabase();
-    const smartResponse = await generateSmartResponse(message, movies);
-
-    document.getElementById(`loading-${loadingId}`).remove();
-    convo.innerHTML += `<div class='bubble bot'>
-      <img src="OSCARPIC.jpeg" alt="Oscar" class="bot-avatar">
-      <div class="bot-message">${smartResponse}</div>
-    </div>`;
-
-  } catch (error) {
-    const loadingElement = document.getElementById(`loading-${loadingId}`);
-    if (loadingElement) loadingElement.remove();
-    
-    console.error("❌ שגיאה:", error);
-    showError(error);
-  }
-
-  convo.scrollTop = convo.scrollHeight;
-}
-
 // פונקציה לטיפול בשגיאות
 function showError(error) {
   const convo = document.getElementById("conversation");
@@ -743,125 +563,25 @@ function showError(error) {
   </div>`;
 }
 
-// 🔧 פונקציה לבדיקה ותיקון של כפתורים לא פעילים
-function debugButtons() {
-  console.log("🔍 בודק כפתורים קיימים:");
-  const buttons = document.querySelectorAll('.choice-button');
-  buttons.forEach((btn, index) => {
-    console.log(`כפתור ${index}:`, {
-      text: btn.textContent,
-      value: btn.getAttribute('data-value'),
-      onclick: btn.onclick,
-      hasEventListener: btn.hasAttribute('data-has-listener')
-    });
-  });
-}
-
-// אירועי מקלדת ופתיחה
-document.addEventListener('DOMContentLoaded', async function() {
-  console.log("🚀 העמוד נטען - מתחיל אתחול עם AI...");
-  
-  const input = document.getElementById("userInput");
-  const convo = document.getElementById("conversation");
-  
-  if (!input || !convo) {
-    console.error("❌ אלמנטים חיוניים לא נמצאו");
-    return;
-  }
-  
-  console.log("✅ אלמנטים נמצאו בהצלחה");
-  
-  input.addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-      sendMessage();
-    }
-  });
-  console.log("✅ Event listener הוגדר לקלט");
-
-  try {
-    const randomWelcome = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
-    console.log("🎭 הודעת ברוכים הבאים נבחרה:", randomWelcome);
-    
-    convo.innerHTML = `<div class='bubble bot'>
-      <img src="OSCARPIC.jpeg" alt="Oscar" class="bot-avatar">
-      <div class="bot-message">${randomWelcome}</div>
-    </div>`;
-    
-    console.log("✅ הודעת פתיחה נוספה בהצלחה");
-  } catch (error) {
-    console.error("❌ שגיאה בהוספת הודעת פתיחה:", error);
-    
-    convo.innerHTML = `<div class='bubble bot'>
-      <img src="OSCARPIC.jpeg" alt="Oscar" class="bot-avatar">
-      <div class="bot-message">שלום! אני אוסקר, בוט המלצות הסרטים שלך עם AI! 🎬🤖 איזה סרט מעניין אותך היום?</div>
-    </div>`;
-  }
-  
-  console.log("🎉 אתחול הושלם בהצלחה - אוסקר עם AI מוכן לשימוש!");
-
-  // 🔧 הוספת CSS נוסף לוודא שהכפתורים לחיצים
-  const additionalCSS = `
-    .choice-button {
-      pointer-events: auto !important;
-      cursor: pointer !important;
-      user-select: none;
-      -webkit-touch-callout: none;
-      -webkit-user-select: none;
-      -khtml-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      border: 2px solid #007bff;
-      background-color: #007bff;
-      color: white;
-      padding: 10px 15px;
-      margin: 5px;
-      border-radius: 25px;
-      font-size: 14px;
-      font-weight: 500;
-      transition: all 0.3s ease;
-      display: inline-block;
-    }
-
-    .choice-button:hover {
-      background-color: #0056b3 !important;
-      border-color: #0056b3 !important;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 8px rgba(0,123,255,0.3);
-    }
-
-    .choice-button:active {
-      transform: translateY(1px);
-      box-shadow: 0 2px 4px rgba(0,123,255,0.3);
-    }
-
-    .interactive-buttons {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 10px;
-      justify-content: flex-start;
-    }
-
-    @media (max-width: 768px) {
-      .choice-button {
-        font-size: 12px;
-        padding: 8px 12px;
-      }
-    }
-  `;
-
-  // הוספת ה-CSS לדף
-  const styleSheet = document.createElement('style');
-  styleSheet.textContent = additionalCSS;
-  document.head.appendChild(styleSheet);
-  
-  console.log("✅ CSS נוסף הוגדר לכפתורים");
-});
-
 // פונקציה לניקוי השיחה
 function clearConversation(userMessage = null) {
   const convo = document.getElementById("conversation");
   convo.innerHTML = '';
+  resetConversationMemory();
+  
+  if (userMessage) {
+    convo.innerHTML += `<div class='bubble user'>${userMessage}</div>`;
+  }
+
+  const randomWelcome = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
+  convo.innerHTML += `<div class='bubble bot'>
+    <img src="OSCARPIC.jpeg" alt="Oscar" class="bot-avatar">
+    <div class="bot-message">${randomWelcome}</div>
+  </div>`;
+}
+
+// פונקציה לאיפוס זיכרון השיחה
+function resetConversationMemory() {
   conversationMemory = {
     lastGenres: [],
     lastMoods: [],
@@ -883,28 +603,22 @@ function clearConversation(userMessage = null) {
       platforms: false
     },
     recommendationOffset: 0,
-    conversationHistory: []
+    conversationHistory: [],
+    mentionedTopics: {
+      mood: false,
+      welcomeGiven: false
+    }
   };
-  
-  if (userMessage) {
-    convo.innerHTML += `<div class='bubble user'>${userMessage}</div>`;
-  }
-
-const randomWelcome = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
-convo.innerHTML += `<div class='bubble bot'>
-  <img src="OSCARPIC.jpeg" alt="Oscar" class="bot-avatar">
-  <div class="bot-message">${randomWelcome}</div>
-</div>`;
 }
 
-// פונקציה ליצירת תשובה חכמה - עודכנה לעבוד עם AI
+// ***** פונקציה משופרת ליצירת תשובה חכמה - זה החלק העיקרי שהשתנה! *****
 async function generateSmartResponse(message, movies) {
   const analysis = await analyzeText(message);
   let response = "";
 
   console.log("Debug: generateSmartResponse - analysis from AI:", analysis);
-  console.log("Debug: generateSmartResponse - conversationMemory before update:", { ...conversationMemory });
 
+  // טיפול בפקודות מיוחדות
   if (analysis.command === "תודה") {
     const randomThankYou = thankYouMessages[Math.floor(Math.random() * thankYouMessages.length)];
     return randomThankYou;
@@ -912,67 +626,114 @@ async function generateSmartResponse(message, movies) {
   
   if (analysis.command === "סיום") {
     const randomGoodbye = goodbyeMessages[Math.floor(Math.random() * goodbyeMessages.length)];
-    // איפוס השיחה
-    conversationMemory = {
-      lastGenres: [],
-      lastMoods: [],
-      lastPlatforms: [],
-      lastRecommendations: [],
-      lastQuestion: null,
-      userPreferences: {
-        age: null,
-        duration: null,
-        favoriteActors: [],
-        favoriteDirectors: []
-      },
-      conversationState: "collecting_info",
-      collectedInfo: {
-        genres: false,
-        age: false,
-        mood: false,
-        duration: false,
-        platforms: false
-      },
-      recommendationOffset: 0,
-      conversationHistory: []
-    };
+    resetConversationMemory();
     return randomGoodbye;
   }
 
-  // שינוי חשוב: לא לאפס offset אם זה רק מידע משלים
-  const isNewGenreRequest = analysis.genres && analysis.genres.length > 0 && 
-    (conversationMemory.lastGenres.length === 0 || 
-     JSON.stringify(analysis.genres) !== JSON.stringify(conversationMemory.lastGenres));
-
-  if (isNewGenreRequest) {
-    conversationMemory.recommendationOffset = 0;
-    console.log("Debug: generateSmartResponse - New genre request detected, resetting offset to 0.");
-  } else if (analysis.command === "אחרים") {
-    conversationMemory.recommendationOffset += 3;
-    console.log("Debug: generateSmartResponse - 'Other' command detected, incrementing offset to:", conversationMemory.recommendationOffset);
+  // טיפול לפי סוג הכוונה של המשתמש
+  switch (analysis.intentType) {
+    case "casual_chat":
+      return handleCasualChat(message);
+      
+    case "requesting_more":
+      return handleMoreRecommendations(movies);
+      
+    case "giving_new_info":
+      return handleNewInfo(analysis, movies);
+      
+    case "asking_for_recommendations":
+      return handleRecommendationRequest(analysis, movies);
+      
+    default:
+      return handleDefault(analysis, movies);
   }
+}
 
-  // עדכון זיכרון השיחה על בסיס ניתוח ה-AI - ללא הודעות חוזרות
+// פונקציה לטיפול בצ'אט מזדמן
+function handleCasualChat(message) {
+  const casualResponses = [
+    "היי! איך אני יכול לעזור לך למצוא סרט מושלם היום? 🎬",
+    "שלום! אני כאן כדי להמליץ לך על סרטים מעולים. מה מעניין אותך? 🍿",
+    "היי! מוכן לגלות סרט חדש? ספר לי מה אתה אוהב 😊"
+  ];
+  
+  if (!conversationMemory.mentionedTopics.welcomeGiven) {
+    conversationMemory.mentionedTopics.welcomeGiven = true;
+    return casualResponses[Math.floor(Math.random() * casualResponses.length)];
+  }
+  
+  return "איך אני יכול לעזור לך למצוא סרט? 😊";
+}
+
+// פונקציה לטיפול בבקשה להמלצות נוספות
+function handleMoreRecommendations(movies) {
+  conversationMemory.recommendationOffset += 3;
+  
+  const foundMovies = analyzeAndFindMovies("", movies);
+  const moviesToRecommend = foundMovies.slice(conversationMemory.recommendationOffset, conversationMemory.recommendationOffset + 3);
+
+  if (moviesToRecommend.length > 0) {
+    let response = "הנה עוד המלצות בשבילך:<br><br>";
+    
+    moviesToRecommend.forEach((movie, index) => {
+      response += `${index + 1}. ${formatMovieRecommendation(movie)}<br><br>`;
+    });
+    
+    if (foundMovies.length > (conversationMemory.recommendationOffset + 3)) {
+      response += "יש לי עוד המלצות אם תרצה! 😉";
+    } else {
+      response += "אלו כל ההמלצות שיש לי עם ההעדפות הנוכחיות. רוצה לנסות משהו אחר? 🤔";
+    }
+    
+    return response;
+  } else {
+    return "זהו, נגמרו לי ההמלצות עם ההעדפות האלו. בוא נחפש משהו אחר? 😊";
+  }
+}
+
+// פונקציה לטיפול במידע חדש מהמשתמש
+function handleNewInfo(analysis, movies) {
+  let response = "";
   let newInfoAdded = false;
   
+  // עדכון המידע בזיכרון
   if (analysis.genres && analysis.genres.length > 0) {
     conversationMemory.lastGenres = analysis.genres;
     conversationMemory.collectedInfo.genres = true;
     newInfoAdded = true;
   }
 
-  if (analysis.mood) {
+  // תגובה למצב רוח רק בפעם הראשונה!
+  if (analysis.mood && analysis.isNewMoodMention && !conversationMemory.mentionedTopics.mood) {
     conversationMemory.lastMoods = [analysis.mood];
+    conversationMemory.mentionedTopics.mood = true;
     newInfoAdded = true;
+    
+    // תגובה למצב רוח רק בפעם הראשונה
+    switch (analysis.mood) {
+      case "עצוב":
+        response += "🥺 מצטער לשמוע שאתה מרגיש כך. בוא נבחר סרט שיעלה לך חיוך! ";
+        break;
+      case "שמח":
+        response += "🎉 אין כמו מצב רוח טוב! בוא נמצא סרט שישמור על זה! ";
+        break;
+      case "מרגש":
+        response += "💖 נראה שאתה במצב לסרט שיגע בלב. יש לי בדיוק מה שצריך! ";
+        break;
+      case "רומנטי":
+        response += "💕 מושלם לערב רומנטי! ";
+        break;
+      case "מפחיד":
+        response += "👻 מוכן לקצת אתגר? בוא נמצא משהו מרתק! ";
+        break;
+    }
   }
   
   if (analysis.platforms && analysis.platforms.length > 0) {
     conversationMemory.lastPlatforms = analysis.platforms;
     conversationMemory.collectedInfo.platforms = true;
     newInfoAdded = true;
-  } else if (analysis.platforms && analysis.platforms.length === 0 && 
-             (message.toLowerCase().includes("לא") || message.toLowerCase().includes("אין"))) {
-    // המשתמש אמר שאין לו מנויים
+  } else if (analysis.platforms && analysis.platforms.length === 0) {
     conversationMemory.lastPlatforms = [];
     conversationMemory.collectedInfo.platforms = true;
     newInfoAdded = true;
@@ -990,159 +751,77 @@ async function generateSmartResponse(message, movies) {
     newInfoAdded = true;
   }
 
-  console.log("Debug: generateSmartResponse - conversationMemory after update:", { ...conversationMemory });
-
-  // בדיקה אם יש מספיק מידע להמלצות
-  const infoTypesToCollect = ["genres", "age", "duration", "platforms"];
-  const allRequiredInfoCollected = infoTypesToCollect.every(type => conversationMemory.collectedInfo[type] === true);
-
-  console.log("Debug: generateSmartResponse - allRequiredInfoCollected:", allRequiredInfoCollected);
+  // אם יש מספיק מידע - תן המלצות
+  const allRequiredInfoCollected = ["genres", "age", "duration", "platforms"]
+    .every(type => conversationMemory.collectedInfo[type] === true);
 
   if (allRequiredInfoCollected) {
-    conversationMemory.conversationState = "recommending";
-    
-    console.log("🎯 מחפש סרטים עם הז'אנרים:", conversationMemory.lastGenres);
-    
-    const foundMovies = analyzeAndFindMovies(message, movies);
-    const moviesToRecommend = foundMovies.slice(conversationMemory.recommendationOffset, conversationMemory.recommendationOffset + 3);
-
-    if (moviesToRecommend.length > 0) {
-      response += "הנה כמה המלצות בשבילך:<br><br>";
-      
-      moviesToRecommend.forEach((movie, index) => {
-        response += `${index + 1}. ${formatMovieRecommendation(movie)}<br><br>`;
-      });
-      
-      if (foundMovies.length > (conversationMemory.recommendationOffset + 3)) {
-        response += "<br>רוצה לראות המלצות נוספות? פשוט תגיד 'עוד' או 'אחרים'! 😉<br>";
-      }
-
-      // הוספת תגובה מותאמת למצב רוח - רק אם זה רלוונטי
-      if (analysis.mood && newInfoAdded) {
-        const mood = analysis.mood;
-        switch(mood) {
-          case "עצוב":
-            response += "💝 מקווה שהסרטים האלה יעזרו לשפר את מצב הרוח שלך!";
-            break;
-          case "מרגש":
-            response += "💖 מקווה שתהנה מהסרטים המרגשים האלה!";
-            break;
-          case "רומנטי":
-            response += "💕 מקווה שתהנה מהסרטים הרומנטיים האלה!";
-            break;
-          case "מרומם":
-            response += "✨ מקווה שהסרטים האלה יעוררו בך השראה!";
-            break;
-          case "נוסטלגי":
-            response += "🌟 מקווה שהסרטים האלה יעירו זיכרונות נעימים!";
-            break;
-          case "משעשע":
-            response += "😊 מקווה שהסרטים האלה יעלו לך חיוך!";
-            break;
-        }
-      }
-
-    } else {
-      if (conversationMemory.recommendationOffset > 0) {
-        response += "זהו, נראה שאלו כל הסרטים שמצאתי עבור ההעדפות הנוכחיות שלך. אולי ננסה עם העדפות אחרות? 😉";
-      } else {
-        response += "מצטער, לא מצאתי סרטים שמתאימים בדיוק להעדפות שלך.";
-      }
-      
-      // איפוס מחדש רק אם לא נמצאו סרטים בכלל
-      conversationMemory.collectedInfo = {
-        genres: false,
-        age: false,
-        mood: false,
-        duration: false,
-        platforms: false
-      };
-      conversationMemory.lastGenres = [];
-      conversationMemory.lastPlatforms = [];
-      conversationMemory.userPreferences.age = null;
-      conversationMemory.userPreferences.duration = null;
-      conversationMemory.recommendationOffset = 0;
-
-      const nextQuestion = getNextQuestion();
-      if (nextQuestion) {
-        response += ` אולי ננסה שוב? ${nextQuestion.question}`;
-        conversationMemory.lastQuestion = nextQuestion.id;
-      } else {
-        response += " אנא נסה לתאר את הסרט שאתה מחפש במילים אחרות.";
-        conversationMemory.lastQuestion = null;
-      }
-    }
+    return generateRecommendations(movies, response);
   } else {
-    const nextQuestion = getNextQuestion();
-    console.log("Debug: generateSmartResponse - nextQuestion:", nextQuestion ? nextQuestion.id : null);
-
-    // הודעה מקוצרת ועניינית יותר
-    if (newInfoAdded) {
-      if (conversationMemory.lastMoods.length > 0) {
-        const mood = conversationMemory.lastMoods[0];
-        switch (mood) {
-          case "עצוב":
-            response += "🥺 מצטער לשמוע שאת מרגישה כך. בואי נרים את מצב הרוח עם סרט שיחמם את הלב! ";
-            break;
-          case "מרגש":
-            response += "💖 הולך להיות מרגש! בוא נבחר סרט שיגע בלב. ";
-            break;
-          case "שמח":
-            response += "🎉 איזה יופי! ממשיך בקצב החיובי! ";
-            break;
-          case "מפחיד":
-            response += "👻 נראה שאתה במצב רוח לאתגר... נבחר משהו מפחיד! ";
-            break;
-          case "נוסטלגי":
-            response += "🕰️ בוא נחזור לרגעים הקלאסיים של הקולנוע. ";
-            break;
-          case "רומנטי":
-            response += "💕 אחלה מצב רוח לערב רומנטי מול המסך! ";
-            break;
-          case "מרומם":
-            response += "✨ מחפש השראה? הנה אנחנו בדרך הנכונה. ";
-            break;
-          case "משעשע":
-            response += "😄 בוא נבחר משהו מצחיק בטירוף! ";
-            break;
-          default:
-            response += "אין בעיה! ";
-        }
-      } else {
-        response += "אין בעיה! ";
-      }
-    }
-
-
-    if (nextQuestion) {
-      response += `${nextQuestion.question}`;
-      
-      // הוספת כפתורים אינטראקטיביים אם יש - משתמש בגירסה המתוקנת
-      if (nextQuestion.hasButtons) {
-        response += "<br><br>" + createInteractiveButtonsWithEvents(nextQuestion);
-        
-        // גם להוסיף debug
-        setTimeout(() => {
-          console.log("🔍 בודק כפתורים שנוצרו:");
-          debugButtons();
-        }, 200);
-      }
-      
-      conversationMemory.lastQuestion = nextQuestion.id;
-    }
+    // שאל על המידע החסר
+    return response + askForMissingInfo();
   }
-
-  // הוספת תשובת הבוט להיסטוריה
-  conversationMemory.conversationHistory.push({
-    role: "assistant",
-    content: response
-  });
-
-  console.log("Debug: generateSmartResponse - Final response length:", response.length);
-  return response || "אשמח לעזור לך למצוא סרט מושלם! מה מעניין אותך?";
 }
 
-// פונקציה לחיפוש סרטים - עודכנה לעבוד עם נתוני AI
+// פונקציה לטיפול בבקשה ישירה להמלצות
+function handleRecommendationRequest(analysis, movies) {
+  // אם יש מספיק מידע - תן המלצות מיד
+  const allRequiredInfoCollected = ["genres", "age", "duration", "platforms"]
+    .every(type => conversationMemory.collectedInfo[type] === true);
+
+  if (allRequiredInfoCollected) {
+    return generateRecommendations(movies, "");
+  } else {
+    return "כדי להמליץ לך על הסרט המושלם, אני צריך לדעת קצת על ההעדפות שלך. " + askForMissingInfo();
+  }
+}
+
+// פונקציה ברירת מחדל
+function handleDefault(analysis, movies) {
+  return handleNewInfo(analysis, movies);
+}
+
+// פונקציה ליצירת המלצות
+function generateRecommendations(movies, prefixResponse = "") {
+  conversationMemory.recommendationOffset = 0;
+  const foundMovies = analyzeAndFindMovies("", movies);
+  const moviesToRecommend = foundMovies.slice(0, 3);
+
+  if (moviesToRecommend.length > 0) {
+    let response = prefixResponse + "הנה ההמלצות שלי בשבילך:<br><br>";
+    
+    moviesToRecommend.forEach((movie, index) => {
+      response += `${index + 1}. ${formatMovieRecommendation(movie)}<br><br>`;
+    });
+    
+    if (foundMovies.length > 3) {
+      response += "יש לי עוד המלצות אם תרצה! פשוט תגיד 'עוד' או 'אחרים' 😉";
+    }
+    
+    return response;
+  } else {
+    return prefixResponse + "מצטער, לא מצאתי סרטים שמתאימים בדיוק להעדפות שלך. אולי ננסה עם קריטריונים אחרים?";
+  }
+}
+
+// פונקציה לשאילת מידע חסר
+function askForMissingInfo() {
+  const nextQuestion = getNextQuestion();
+  if (nextQuestion) {
+    let response = nextQuestion.question;
+    
+    if (nextQuestion.hasButtons) {
+      response += "<br><br>" + createInteractiveButtonsWithEvents(nextQuestion);
+    }
+    
+    conversationMemory.lastQuestion = nextQuestion.id;
+    return response;
+  }
+  
+  return "ספר לי קצת על מה שאתה מחפש ואני אמליץ לך! 😊";
+}
+
+// פונקציה לחיפוש סרטים - נשארה זהה
 function analyzeAndFindMovies(message, movies) {
   let filtered = [...movies];
 
@@ -1172,33 +851,27 @@ function analyzeAndFindMovies(message, movies) {
 
   // סינון לפי מצב רוח
   if (conversationMemory.lastMoods.length > 0) {
-    console.log("Debug: analyzeAndFindMovies - Filtering by mood. Current movies:", filtered.map(m => m.Title));
     const mood = conversationMemory.lastMoods[0];
     switch(mood) {
       case "עצוב":
         filtered = filtered.filter(movie => 
-          movie.Genres.toLowerCase().includes("comedy") || 
-          movie.Genres.toLowerCase().includes("קומדיה")
+          movie.Genres.toLowerCase().includes("comedy")
         );
         break;
       case "מרגש":
         filtered = filtered.filter(movie => 
-          movie.Genres.toLowerCase().includes("drama") || 
-          movie.Genres.toLowerCase().includes("דרמה")
+          movie.Genres.toLowerCase().includes("drama")
         );
         break;
       case "רומנטי":
         filtered = filtered.filter(movie => 
-          movie.Genres.toLowerCase().includes("romance") || 
-          movie.Genres.toLowerCase().includes("רומנטי")
+          movie.Genres.toLowerCase().includes("romance")
         );
         break;
       case "מרומם":
         filtered = filtered.filter(movie => 
-          movie.Genres.toLowerCase().includes("drama") || 
-          movie.Genres.toLowerCase().includes("דרמה") ||
-          movie.Genres.toLowerCase().includes("biography") ||
-          movie.Genres.toLowerCase().includes("ביוגרפי")
+          movie.Genres.toLowerCase().includes("drama") ||
+          movie.Genres.toLowerCase().includes("biography")
         );
         break;
       case "נוסטלגי":
@@ -1208,52 +881,40 @@ function analyzeAndFindMovies(message, movies) {
         break;
       case "משעשע":
         filtered = filtered.filter(movie => 
-          movie.Genres.toLowerCase().includes("comedy") || 
-          movie.Genres.toLowerCase().includes("קומדיה")
+          movie.Genres.toLowerCase().includes("comedy")
         );
         break;
     }
-    console.log("Debug: analyzeAndFindMovies - Movies after mood filtering:", filtered.map(m => m.Title));
   }
 
   // סינון לפי פלטפורמה
   if (conversationMemory.lastPlatforms.length > 0) {
-    console.log("Debug: analyzeAndFindMovies - Filtering by platforms. Current movies:", filtered.map(m => m.Title));
     filtered = filtered.filter(movie => 
       conversationMemory.lastPlatforms.some(platform => movie[platform] === 1)
     );
-    console.log("Debug: analyzeAndFindMovies - Movies after platform filtering:", filtered.map(m => m.Title));
   }
 
   // סינון לפי גיל
   if (conversationMemory.userPreferences.age) {
-    console.log("Debug: analyzeAndFindMovies - Filtering by age. User preference:", conversationMemory.userPreferences.age, ". Current movies:", filtered.map(m => m.Title));
     filtered = filtered.filter(movie => {
       const movieAgeRange = movie.ageRange;
       const userAgePreference = conversationMemory.userPreferences.age;
-      let isMatch = false;
-
-      if (movieAgeRange === "All Ages") {
-        isMatch = true;
-      } else {
-        if (userAgePreference === "7+") {
-          isMatch = (movieAgeRange === "7+");
-        } else if (userAgePreference === "13+") {
-          isMatch = (movieAgeRange === "7+" || movieAgeRange === "13+");
-        } else if (userAgePreference === "17+") {
-          isMatch = true;
-        }
-      }
       
-      console.log(`Debug: Checking movie '${movie.Title}' (age: ${movie.ageRange}) against user preference '${conversationMemory.userPreferences.age}'. Match: ${isMatch}`);
-      return isMatch;
+      if (movieAgeRange === "All Ages") return true;
+      
+      if (userAgePreference === "7+") {
+        return (movieAgeRange === "7+");
+      } else if (userAgePreference === "13+") {
+        return (movieAgeRange === "7+" || movieAgeRange === "13+");
+      } else if (userAgePreference === "17+") {
+        return true;
+      }
+      return false;
     });
-    console.log("Debug: analyzeAndFindMovies - Movies after age filtering:", filtered.map(m => m.Title));
   }
 
   // סינון לפי אורך סרט
   if (conversationMemory.userPreferences.duration) {
-    console.log("Debug: analyzeAndFindMovies - Filtering by duration. User preference:", conversationMemory.userPreferences.duration, ". Current movies:", filtered.map(m => m.Title));
     filtered = filtered.filter(movie => {
       const duration = movie.Duration || 0;
       if (conversationMemory.userPreferences.duration === "קצר") return duration <= 90;
@@ -1261,7 +922,6 @@ function analyzeAndFindMovies(message, movies) {
       if (conversationMemory.userPreferences.duration === "ארוך") return duration > 120;
       return true;
     });
-    console.log("Debug: analyzeAndFindMovies - Movies after duration filtering:", filtered.map(m => m.Title));
   }
 
   // מיון לפי דירוג
@@ -1273,8 +933,6 @@ function analyzeAndFindMovies(message, movies) {
   }
 
   console.log("🎯 סה״כ סרטים שנמצאו:", filtered.length);
-  console.log("🏆 סרטים סופיים:", filtered.map(m => `${m.Title} (${m.Genres})`));
-
   return filtered;
 }
 
@@ -1302,7 +960,6 @@ function getEnglishGenre(hebrewGenre) {
     "מלחמה": "War",
     "הרפתקה": "Adventure"
   };
-  console.log(`Debug: getEnglishGenre - Mapping '${hebrewGenre}' to '${genreMap[hebrewGenre] || hebrewGenre}'`);
   return genreMap[hebrewGenre] || hebrewGenre;
 }
 
@@ -1329,11 +986,10 @@ function formatMovieRecommendation(movie) {
 📺 זמין ב: ${platforms.join(", ") || "לא צוינה פלטפורמה"}`;
 
   html += trailerLinkHTML;
-
   return html;
 }
 
-// פונקציה לשליחת הודעה - עודכנה לעבוד עם AI
+// פונקציה לשליחת הודעה - עודכנה לעבוד עם המערכת החדשה
 async function sendMessage() {
   const input = document.getElementById("userInput");
   const message = input.value.trim();
@@ -1352,7 +1008,7 @@ async function sendMessage() {
     return;
   }
 
-  // בדיקה אם זה רק ברכה פשוטה (ללא תוכן נוסף)
+  // בדיקה אם זה רק ברכה פשוטה
   const simpleGreetings = ["היי", "שלום", "הי", "בוקר טוב", "שלום אוסקר"];
   const isOnlyGreeting = simpleGreetings.some(g => 
     lowerMessage === g || 
@@ -1397,3 +1053,91 @@ async function sendMessage() {
 
   convo.scrollTop = convo.scrollHeight;
 }
+
+// אירועי מקלדת ופתיחה
+document.addEventListener('DOMContentLoaded', async function() {
+  console.log("🚀 העמוד נטען - מתחיל אתחול עם AI...");
+  
+  const input = document.getElementById("userInput");
+  const convo = document.getElementById("conversation");
+  
+  if (!input || !convo) {
+    console.error("❌ אלמנטים חיוניים לא נמצאו");
+    return;
+  }
+  
+  input.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      sendMessage();
+    }
+  });
+
+  try {
+    const randomWelcome = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
+    
+    convo.innerHTML = `<div class='bubble bot'>
+      <img src="OSCARPIC.jpeg" alt="Oscar" class="bot-avatar">
+      <div class="bot-message">${randomWelcome}</div>
+    </div>`;
+    
+  } catch (error) {
+    console.error("❌ שגיאה בהוספת הודעת פתיחה:", error);
+    
+    convo.innerHTML = `<div class='bubble bot'>
+      <img src="OSCARPIC.jpeg" alt="Oscar" class="bot-avatar">
+      <div class="bot-message">שלום! אני אוסקר, בוט המלצות הסרטים שלך עם AI! 🎬🤖 איזה סרט מעניין אותך היום?</div>
+    </div>`;
+  }
+
+  // הוספת CSS לכפתורים
+  const additionalCSS = `
+    .choice-button {
+      pointer-events: auto !important;
+      cursor: pointer !important;
+      user-select: none;
+      border: 2px solid #007bff;
+      background-color: #007bff;
+      color: white;
+      padding: 10px 15px;
+      margin: 5px;
+      border-radius: 25px;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      display: inline-block;
+    }
+
+    .choice-button:hover {
+      background-color: #0056b3 !important;
+      border-color: #0056b3 !important;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0,123,255,0.3);
+    }
+
+    .choice-button:active {
+      transform: translateY(1px);
+      box-shadow: 0 2px 4px rgba(0,123,255,0.3);
+    }
+
+    .interactive-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+      justify-content: flex-start;
+    }
+
+    @media (max-width: 768px) {
+      .choice-button {
+        font-size: 12px;
+        padding: 8px 12px;
+      }
+    }
+  `;
+
+  const styleSheet = document.createElement('style');
+  styleSheet.textContent = additionalCSS;
+  document.head.appendChild(styleSheet);
+  
+  console.log("🎉 אתחול הושלם בהצלחה - אוסקר עם AI מוכן לשימוש!");
+});
