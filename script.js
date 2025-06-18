@@ -612,9 +612,46 @@ function createInteractiveButtonsWithEvents(question) {
       const btnId = `btn-${buttonId}-${index}`;
       const btnElement = document.getElementById(btnId);
       if (btnElement) {
-        btnElement.addEventListener('click', function() {
+        btnElement.addEventListener('click', async function() {
           console.log("🔘 כפתור נלחץ (event listener):", button.value);
-          window.handleButtonClick(button.value, buttonId);
+          
+          // הסרת הכפתורים לאחר הבחירה
+          const buttonsContainer = document.getElementById(buttonId);
+          if (buttonsContainer) {
+            buttonsContainer.remove();
+            console.log("✅ כפתורים הוסרו");
+          }
+          
+          // הוספת תשובת המשתמש לשיחה
+          const convo = document.getElementById("conversation");
+          convo.innerHTML += `<div class='bubble user'>${button.value}</div>`;
+          
+          // עיבוד התשובה - עכשיו בתוך async function
+          const loadingId = Date.now();
+          convo.innerHTML += `<div class='bubble bot' id='loading-${loadingId}'>
+            <img src="OSCARPIC.jpeg" alt="Oscar" class="bot-avatar">
+            <div class="bot-message">🤖 מעבד את הבחירה שלך...</div>
+          </div>`;
+
+          try {
+            const movies = await loadMoviesDatabase();
+            const smartResponse = await generateSmartResponse(button.value, movies);
+
+            document.getElementById(`loading-${loadingId}`).remove();
+            convo.innerHTML += `<div class='bubble bot'>
+              <img src="OSCARPIC.jpeg" alt="Oscar" class="bot-avatar">
+              <div class="bot-message">${smartResponse}</div>
+            </div>`;
+
+          } catch (error) {
+            const loadingElement = document.getElementById(`loading-${loadingId}`);
+            if (loadingElement) loadingElement.remove();
+            
+            console.error("❌ שגיאה:", error);
+            showError(error);
+          }
+
+          convo.scrollTop = convo.scrollHeight;
         });
       }
     });
@@ -640,8 +677,11 @@ function handleButtonClick(value, buttonId) {
   const convo = document.getElementById("conversation");
   convo.innerHTML += `<div class='bubble user'>${value}</div>`;
   
-  // עיבוד התשובה
-  processUserChoice(value);
+  // עיבוד התשובה - כעת קוראת ל-async function
+  processUserChoice(value).catch(error => {
+    console.error("❌ שגיאה בעיבוד בחירת המשתמש:", error);
+    showError(error);
+  });
   
   convo.scrollTop = convo.scrollHeight;
 }
@@ -718,7 +758,7 @@ function debugButtons() {
 }
 
 // אירועי מקלדת ופתיחה
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
   console.log("🚀 העמוד נטען - מתחיל אתחול עם AI...");
   
   const input = document.getElementById("userInput");
@@ -850,12 +890,13 @@ function clearConversation(userMessage = null) {
     convo.innerHTML += `<div class='bubble user'>${userMessage}</div>`;
   }
 
-const randomWelcome = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
-convo.innerHTML += `<div class='bubble bot'>
-  <img src="OSCARPIC.jpeg" alt="Oscar" class="bot-avatar">
-  <div class="bot-message">${randomWelcome}</div>
-</div>`;
-}
+  const randomWelcome = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
+  convo.innerHTML += `<div class='bubble bot'>
+    <img src="OSCARPIC.jpeg" alt="Oscar" class="bot-avatar">
+    <div class="bot-message">${randomWelcome}</div>
+  </div>`;
+}🤖 מעבד את הבחירה שלך...</div>
+  </div>`;
 
   try {
     const movies = await loadMoviesDatabase();
