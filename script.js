@@ -70,54 +70,6 @@ const backupMovies = [
     "הוט": 0,
     trailer: "https://www.youtube.com/watch?v=zAGVQLHvwOY",
     Duration: 122
-  },
-  {
-    Title: "המטריקס",
-    Release_Year: 1999,
-    Genres: "Action, Sci-Fi",
-    Rating: "8.7",
-    ageRange: "17+",
-    "נטפליקס": 1,
-    "יס": 0,
-    "הוט": 1,
-    trailer: "https://www.youtube.com/watch?v=matrix_trailer_example",
-    Duration: 110
-  },
-  {
-    Title: "שתיקת הכבשים",
-    Release_Year: 1991,
-    Genres: "Crime, Drama, Thriller",
-    Rating: "8.6",
-    ageRange: "17+",
-    "נטפליקס": 1,
-    "יס": 0,
-    "הוט": 0,
-    trailer: "https://www.youtube.com/watch?v=silence_of_the_lambs_trailer_example",
-    Duration: 118
-  },
-  {
-    Title: "שר הטבעות: אחוות הטבעת",
-    Release_Year: 2001,
-    Genres: "Adventure, Drama, Fantasy",
-    Rating: "8.8",
-    ageRange: "13+",
-    "נטפליקס": 0,
-    "יס": 1,
-    "הוט": 1,
-    trailer: "https://www.youtube.com/watch?v=fellowship_trailer_example",
-    Duration: 178
-  },
-  {
-    Title: "הסנדק",
-    Release_Year: 1972,
-    Genres: "Crime, Drama",
-    Rating: "9.2",
-    ageRange: "17+",
-    "נטפליקס": 1,
-    "יס": 0,
-    "הוט": 0,
-    trailer: "https://www.youtube.com/watch?v=godfather_trailer_example",
-    Duration: 175
   }
 ];
 
@@ -137,7 +89,6 @@ async function loadMoviesDatabase() {
     
     moviesDatabase = await response.json();
     console.log(`✅ נטענו ${moviesDatabase.length} סרטים מהמאגר המקומי`);
-    console.log("📊 דוגמה לסרט:", moviesDatabase[0]);
     return moviesDatabase;
   } catch (error) {
     console.error("❌ שגיאה בטעינת הסרטים:", error);
@@ -147,7 +98,7 @@ async function loadMoviesDatabase() {
   }
 }
 
-// עדכון זיכרון השיחה - עם מעקב אחרי נושאים שהוזכרו
+// עדכון זיכרון השיחה
 let conversationMemory = {
   lastGenres: [],
   lastMoods: [],
@@ -170,7 +121,6 @@ let conversationMemory = {
   },
   recommendationOffset: 0,
   conversationHistory: [],
-  // הוספה חדשה - מעקב אחרי מה כבר הוזכר
   mentionedTopics: {
     mood: false,
     welcomeGiven: false
@@ -191,12 +141,10 @@ const thankYouMessages = [
   "זה בדיוק למה אני כאן! 😄 חזור אליי מתי שתרצה המלצות חדשות! 🎬"
 ];
 
-// עדכון שאלות אינטראקטיביות
 const interactiveQuestions = [
   {
     id: "genres",
     question: "איזה סוגי סרטים אתה אוהב? 🎭",
-    keywords: ["ז'אנר", "סוג", "סרטים", "אוהב"],
     hasButtons: true,
     buttons: [
       { text: "🎬 אקשן", value: "אקשן" },
@@ -207,22 +155,17 @@ const interactiveQuestions = [
       { text: "🔍 מתח", value: "מתח" },
       { text: "🚀 מדע בדיוני", value: "מדע בדיוני" },
       { text: "🧙‍♂️ פנטזיה", value: "פנטזיה" },
-      { text: "🎨 אנימציה", value: "אנימציה" },
-      { text: "📚 תיעודי", value: "תיעודי" },
-      { text: "👑 ביוגרפיה", value: "ביוגרפיה" },
-      { text: "⚔️ היסטוריה", value: "היסטוריה" }
+      { text: "🎨 אנימציה", value: "אנימציה" }
     ]
   },
   {
     id: "age",
     question: "מה הגיל שלך? זה יעזור לי להתאים סרטים מתאימים 👥",
-    keywords: ["גיל", "בן", "בת", "ילד", "מבוגר"],
     hasButtons: false
   },
   {
     id: "duration",
     question: "כמה זמן יש לך לצפות בסרט? 🕒",
-    keywords: ["זמן", "אורך", "כמה זמן", "משך"],
     hasButtons: true,
     buttons: [
       { text: "⏱️ פחות משעה וחצי", value: "קצר" },
@@ -233,7 +176,6 @@ const interactiveQuestions = [
   {
     id: "platforms",
     question: "האם יש לך מנוי לנטפליקס, יס או הוט? 📺",
-    keywords: ["פלטפורמה", "מנוי", "נטפליקס", "יס", "הוט"],
     hasButtons: true,
     buttons: [
       { text: "📺 נטפליקס", value: "נטפליקס" },
@@ -244,12 +186,11 @@ const interactiveQuestions = [
   }
 ];
 
-// 🤖 פונקציה לניתוח טקסט באמצעות Gemini AI - מתוקנת להבנה טובה יותר
+// פונקציה לניתוח טקסט באמצעות Gemini AI
 async function analyzeTextWithAI(userMessage, conversationHistory = []) {
   try {
     console.log("🤖 שולח לניתוח ב-Gemini AI:", userMessage);
     
-    // פרומפט משופר עם דוגמאות ברורות יותר
     const prompt = `
 אתה עוזר חכם לבוט המלצות סרטים בעברית בשם "אוסקר". 
 תפקידך לנתח בדקדקנות מה המשתמש רוצה ולזהות את כל המידע הרלוונטי.
@@ -272,23 +213,13 @@ ${conversationHistory.slice(-5).map(msg => `${msg.role}: ${msg.content}`).join('
    - "בא לי להתרגש", "רוצה לבכות" = מרגש
    - לא לזהות כמצב רוח: "משהו עצוב" (זה ז'אנר), "סרט שמח" (זה לא מצב רוח)
 
-3. **גיל** - כל אזכור של גיל:
-   - "אני בן 25", "בת 15", "גיל 30"
+3. **גיל** - כל אזכור של גיל: "אני בן 25", "בת 15", "גיל 30"
 
-4. **פלטפורמות**:
-   - "יש לי נטפליקס", "יש יס", "יש הוט"
-   - "כן" (אם שאלתי על פלטפורמה) = כל הפלטפורמות שהזכרתי
-   - "לא" או "אין לי" = רשימה רקה
+4. **פלטפורמות**: "יש לי נטפליקס", "יש יס", "יש הוט", "כן", "לא"
 
-5. **אורך סרט**:
-   - "קצר", "מהיר", "לא הרבה זמן" = קצר
-   - "ארוך", "יותר משעתיים" = ארוך
-   - "רגיל", "בינוני" = בינוני
+5. **אורך סרט**: "קצר", "מהיר", "ארוך", "יותר משעתיים", "רגיל", "בינוני"
 
-6. **פקודות מיוחדות**:
-   - "עוד", "אחרים", "נוספים" = requesting_more
-   - "תודה", "thanks" = תודה
-   - "ביי", "להתראות" = סיום
+6. **פקודות מיוחדות**: "עוד", "אחרים", "תודה", "ביי", "להתראות"
 
 דוגמאות לניתוח נכון:
 - "בא לי משהו מצחיק" → genres: ["קומדיה"], intentType: "giving_new_info"
@@ -366,7 +297,7 @@ ${conversationHistory.slice(-5).map(msg => `${msg.role}: ${msg.content}`).join('
   }
 }
 
-// פונקציית גיבוי משופרת שמבינה טוב יותר
+// פונקציית גיבוי משופרת
 function enhancedFallbackAnalysis(text) {
   const lowerText = text.toLowerCase().trim();
   const analysis = {
@@ -478,7 +409,7 @@ function enhancedFallbackAnalysis(text) {
   return analysis;
 }
 
-// פונקציה לניתוח טקסט - עכשיו משתמשת ב-AI
+// פונקציה לניתוח טקסט
 async function analyzeText(text) {
   console.log("🔍 מתחיל ניתוח טקסט:", text);
   
@@ -495,40 +426,6 @@ async function analyzeText(text) {
   
   console.log("🎯 תוצאת ניתוח סופית:", aiAnalysis);
   return aiAnalysis;
-}
-
-// פונקציה לחישוב דמיון בין סרטים
-function calculateSimilarity(movie1, movie2) {
-  let score = 0;
-  
-  const genres1 = movie1.Genres.toLowerCase().split(", ");
-  const genres2 = movie2.Genres.toLowerCase().split(", ");
-  const commonGenres = genres1.filter(g => genres2.includes(g));
-  score += commonGenres.length * 2;
-
-  const ratingDiff = Math.abs(parseFloat(movie1.Rating) - parseFloat(movie2.Rating));
-  score += (10 - ratingDiff) * 0.5;
-
-  const yearDiff = Math.abs(movie1.Release_Year - movie2.Release_Year);
-  score += (10 - Math.min(yearDiff, 10)) * 0.3;
-
-  return score;
-}
-
-// פונקציה לזיהוי טקסט לא ברור
-function isUnclearText(text) {
-  if (text.length < 2) return true;
-  if (/^[\s\p{P}]+$/u.test(text)) return true;
-  if (/^\d+$/.test(text)) return true;
-  if (/^[א-ת]{1,2}$/.test(text)) return true;
-  if (/^[^א-תa-zA-Z0-9\s]+$/.test(text)) return true;
-  
-  return false;
-}
-
-// פונקציה לבדיקת הבנה של תשובה
-function checkUnderstanding(message, questionId) {
-  return !isUnclearText(message);
 }
 
 // פונקציה לקבלת שאלה הבאה
@@ -576,12 +473,11 @@ function createInteractiveButtonsWithEvents(question) {
       const btnElement = document.getElementById(btnId);
       if (btnElement) {
         btnElement.addEventListener('click', async function() {
-          console.log("🔘 כפתור נלחץ (event listener):", button.value);
+          console.log("🔘 כפתור נלחץ:", button.value);
           
           const buttonsContainer = document.getElementById(buttonId);
           if (buttonsContainer) {
             buttonsContainer.remove();
-            console.log("✅ כפתורים הוסרו");
           }
           
           const convo = document.getElementById("conversation");
@@ -629,11 +525,9 @@ function showError(error) {
     errorMessage = error;
   } else if (error.message) {
     if (error.message.includes("Failed to load movies")) {
-      errorMessage = `⚠️ לא הצלחתי לטעון את מאגר הסרטים.<br>
-        אנא וודא שקובץ movies.json קיים ונגיש.`;
+      errorMessage = `⚠️ לא הצלחתי לטעון את מאגר הסרטים.<br>אנא וודא שקובץ movies.json קיים ונגיש.`;
     } else if (error.message.includes("Gemini API error")) {
-      errorMessage = `🤖 יש בעיה עם שירות ה-AI.<br>
-        אני עובר לניתוח מקומי לטוב אותך! 🔄`;
+      errorMessage = `🤖 יש בעיה עם שירות ה-AI.<br>אני עובר לניתוח מקומי! 🔄`;
     }
   }
   
@@ -691,7 +585,7 @@ function resetConversationMemory() {
   };
 }
 
-// ***** פונקציה משופרת ליצירת תשובה חכמה - זה החלק העיקרי שהשתנה! *****
+// פונקציה משופרת ליצירת תשובה חכמה
 async function generateSmartResponse(message, movies) {
   const analysis = await analyzeText(message);
   let response = "";
@@ -771,7 +665,7 @@ function handleMoreRecommendations(movies) {
   }
 }
 
-// פונקציה לטיפול במידע חדש מהמשתמש - מתוקנת!
+// פונקציה לטיפול במידע חדש מהמשתמש
 function handleNewInfo(analysis, movies) {
   let response = "";
   let newInfoAdded = false;
@@ -846,7 +740,6 @@ function handleNewInfo(analysis, movies) {
 
 // פונקציה לטיפול בבקשה ישירה להמלצות
 function handleRecommendationRequest(analysis, movies) {
-  // אם יש מספיק מידע - תן המלצות מיד
   const allRequiredInfoCollected = ["genres", "age", "duration", "platforms"]
     .every(type => conversationMemory.collectedInfo[type] === true);
 
@@ -902,7 +795,7 @@ function askForMissingInfo() {
   return "ספר לי קצת על מה שאתה מחפש ואני אמליץ לך! 😊";
 }
 
-// פונקציה לחיפוש סרטים - נשארה זהה
+// פונקציה לחיפוש סרטים
 function analyzeAndFindMovies(message, movies) {
   let filtered = [...movies];
 
@@ -1070,7 +963,7 @@ function formatMovieRecommendation(movie) {
   return html;
 }
 
-// פונקציה לשליחת הודעה - עודכנה לעבוד עם המערכת החדשה
+// פונקציה לשליחת הודעה
 async function sendMessage() {
   const input = document.getElementById("userInput");
   const message = input.value.trim();
