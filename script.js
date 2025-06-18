@@ -605,16 +605,18 @@ function createPersonalizedResponse(analysis, infoType) {
   
   console.log("🎯 יוצר תגובה מותאמת:", { infoType, gender, isFemale });
   
+  // תיקון: ודא שיש תוכן בהתאם לסוג המידע
   const responses = {
     genres: {
       male: [
-        `מעולה! ${analysis.genres.join(' ו')} זו בחירה טובה! 🎬`,
-        `אני רואה שאתה אוהב ${analysis.genres.join(' ו')} - יש לי המלצות נהדרות! 🍿`,
-        `סופר! ${analysis.genres.join(' ו')} זה ז'אנר שאני מכיר טוב 😊`
+        `מעולה! ${analysis.genres ? analysis.genres.join(' ו') : 'הז\'אנר שבחרת'} זו בחירה טובה! 🎬`,
+        `אני רואה שאתה אוהב ${analysis.genres ? analysis.genres.join(' ו') : 'הז\'אנר הזה'} - יש לי המלצות נהדרות! 🍿`,
+        `סופר! ${analysis.genres ? analysis.genres.join(' ו') : 'הז\'אנר הזה'} זה ז'אנר שאני מכיר טוב 😊`
       ],
       female: [
-        `מעולה! ${analysis.genres.join(' ו')} זו בחירה טובה! 🎬`,
-        `סופר! ${analysis.genres.join(' ו')} זה ז'אנר שאני מכיר טוב 😊`
+        `מעולה! ${analysis.genres ? analysis.genres.join(' ו') : 'הז\'אנר שבחרת'} זו בחירה טובה! 🎬`,
+        `אני רואה שאת אוהבת ${analysis.genres ? analysis.genres.join(' ו') : 'הז\'אנר הזה'} - יש לי המלצות נהדרות! 🍿`,
+        `סופר! ${analysis.genres ? analysis.genres.join(' ו') : 'הז\'אנר הזה'} זה ז'אנר שאני מכיר טוב 😊`
       ]
     },
     age: {
@@ -633,12 +635,12 @@ function createPersonalizedResponse(analysis, infoType) {
       male: [
         "מצוין! עכשיו אני יודע איפה אתה יכול לצפות 📺",
         "טוב לדעת! זה יעזור לי למצוא סרטים זמינים בשבילך 🎮",
-        "אחלה! עכשיו אני יכול להמליץ לך רק על סרטים שתוכל לראות 👌"
+        "נהדר! עכשיו אני יכול להמליץ לך רק על סרטים שתוכל לראות 👌"
       ],
       female: [
         "מצוין! עכשיו אני יודע איפה את יכולה לצפות 📺",
         "טוב לדעת! זה יעזור לי למצוא סרטים זמינים בשבילך 🎮",
-        "אחלה! עכשיו אני יכול להמליץ לך רק על סרטים שתוכלי לראות 👌"
+        "נהדר! עכשיו אני יכול להמליץ לך רק על סרטים שתוכלי לראות 👌"
       ]
     },
     duration: {
@@ -667,7 +669,6 @@ function createPersonalizedResponse(analysis, infoType) {
   console.log("⚠️ לא נמצאה תגובה מתאימה, משתמש ברירת מחדל");
   return "תודה על המידע!";
 }
-
 // פונקציה משופרת ליצירת תשובה חכמה
 async function generateSmartResponse(message, movies) {
   const analysis = await analyzeText(message);
@@ -748,8 +749,12 @@ function handleMoreRecommendations(movies) {
   }
 }
 
-// פונקציה לטיפול במידע חדש מהמשתמש - מתוקנת
+// פונקציה לטיפול במידע חדש מהמשתמש
 function handleNewInfo(analysis, movies) {
+  console.log("🔍 handleNewInfo called with analysis:", analysis);
+  console.log("🔍 Current conversationMemory before update:", JSON.stringify(conversationMemory.collectedInfo, null, 2));
+  console.log("🔍 Current genres in memory:", conversationMemory.lastGenres);
+  
   let response = "";
   let newInfoAdded = false;
   let responseType = null;
@@ -757,51 +762,75 @@ function handleNewInfo(analysis, movies) {
   // שמירת מגדר אם זוהה
   if (analysis.gender) {
     conversationMemory.userPreferences.gender = analysis.gender;
+    console.log("👥 Gender detected and saved:", analysis.gender);
   }
   
-  // עדכון המידע בזיכרון
+ // עדכון המידע בזיכרון - תיקון: לא נמחק מידע קיים!
   if (analysis.genres && analysis.genres.length > 0) {
-    conversationMemory.lastGenres = analysis.genres;
-    conversationMemory.collectedInfo.genres = true;
-    newInfoAdded = true;
-    responseType = "genres";
-    console.log("✅ זוהו ז'אנרים:", analysis.genres);
+    // אם כבר יש ז'אנרים - הוסף אליהם, אל תמחק
+    if (conversationMemory.lastGenres.length === 0) {
+      conversationMemory.lastGenres = analysis.genres;
+      conversationMemory.collectedInfo.genres = true;
+      newInfoAdded = true;
+      responseType = "genres";
+      console.log("✅ NEW Genres detected and saved:", analysis.genres);
+    } else {
+      console.log("ℹ️ Genres already exist in memory:", conversationMemory.lastGenres);
+    }
   }
 
-  if (analysis.ageRange) {
+   if (analysis.ageRange && !conversationMemory.collectedInfo.age) {
     conversationMemory.userPreferences.age = analysis.ageRange;
     conversationMemory.collectedInfo.age = true;
     newInfoAdded = true;
     responseType = "age";
+    console.log("✅ NEW Age detected and saved:", analysis.ageRange);
+  } else if (analysis.ageRange) {
+    console.log("ℹ️ Age already exists in memory:", conversationMemory.userPreferences.age);
   }
   
-  if (analysis.duration) {
+  if (analysis.duration && !conversationMemory.collectedInfo.duration) {
     conversationMemory.userPreferences.duration = analysis.duration;
     conversationMemory.collectedInfo.duration = true;
     newInfoAdded = true;
     responseType = "duration";
+    console.log("✅ NEW Duration detected and saved:", analysis.duration);
+  } else if (analysis.duration) {
+    console.log("ℹ️ Duration already exists in memory:", conversationMemory.userPreferences.duration);
   }
   
-  // טיפול בפלטפורמות - חשוב! צריך לסמן שנאסף המידע גם אם אין פלטפורמות
-  if (analysis.platforms !== null && analysis.platforms !== undefined) {
-    if (analysis.platforms.length > 0) {
-      conversationMemory.lastPlatforms = analysis.platforms;
-      conversationMemory.collectedInfo.platforms = true;
-      newInfoAdded = true;
-      responseType = "platforms";
+// טיפול בפלטפורמות - תיקון: רק אם עדיין לא נאסף המידע
+  console.log("🔍 Checking platforms. analysis.platforms:", analysis.platforms);
+  console.log("🔍 Current platforms status in memory:", conversationMemory.collectedInfo.platforms);
+ if (!conversationMemory.collectedInfo.platforms) {
+    if (analysis.platforms !== null && analysis.platforms !== undefined) {
+      console.log("📺 Platforms data exists, length:", analysis.platforms.length);
+      
+      if (analysis.platforms.length > 0) {
+        conversationMemory.lastPlatforms = analysis.platforms;
+        conversationMemory.collectedInfo.platforms = true;
+        newInfoAdded = true;
+        responseType = "platforms";
+        console.log("✅ NEW Platforms with content saved:", analysis.platforms);
+      } else if (analysis.platforms.length === 0) {
+        // רשימה ריקה - אין מנויים
+        conversationMemory.lastPlatforms = [];
+        conversationMemory.collectedInfo.platforms = true;
+        newInfoAdded = true;
+        responseType = "platforms";
+        console.log("✅ NEW Empty platforms (no subscriptions) saved");
+      }
     } else {
-      // גם אם אין פלטפורמות - זה עדיין מידע שנאסף
-      conversationMemory.lastPlatforms = [];
-      conversationMemory.collectedInfo.platforms = true;
-      newInfoAdded = true;
-      responseType = "platforms";
+      console.log("⚠️ No platform data in analysis, platforms not collected yet");
     }
+  } else {
+    console.log("ℹ️ Platforms already exist in memory:", conversationMemory.lastPlatforms);
   }
-
   // תגובה למצב רוח רק בפעם הראשונה
   if (analysis.mood && analysis.isNewMoodMention && !conversationMemory.mentionedTopics.mood) {
     conversationMemory.lastMoods = [analysis.mood];
     conversationMemory.mentionedTopics.mood = true;
+    console.log("💭 Mood response added:", analysis.mood);
     
     const isFemale = conversationMemory.userPreferences.gender === "female";
     switch (analysis.mood) {
@@ -824,36 +853,48 @@ function handleNewInfo(analysis, movies) {
     }
   }
 
+ console.log("🔍 After updates - conversationMemory.collectedInfo:", JSON.stringify(conversationMemory.collectedInfo, null, 2));
+  console.log("🔍 After updates - genres in memory:", conversationMemory.lastGenres);
+  
   // בדיקה אם יש מספיק מידע - חשוב! צריך את כל 4 הקטגוריות
-  const allRequiredInfoCollected = ["genres", "age", "duration", "platforms"]
-    .every(type => conversationMemory.collectedInfo[type] === true);
-
-  console.log("🔍 בדיקת מידע שנאסף:", {
-    genres: conversationMemory.collectedInfo.genres,
-    age: conversationMemory.collectedInfo.age,
-    duration: conversationMemory.collectedInfo.duration,
-    platforms: conversationMemory.collectedInfo.platforms,
-    allCollected: allRequiredInfoCollected
+  const requiredInfo = ["genres", "age", "duration", "platforms"];
+  const collectedStatus = {};
+  
+  requiredInfo.forEach(info => {
+    collectedStatus[info] = conversationMemory.collectedInfo[info];
   });
 
+  const allRequiredInfoCollected = requiredInfo.every(type => conversationMemory.collectedInfo[type] === true);
+
+  console.log("🔍 Required info status:", collectedStatus);
+  console.log("🔍 All required info collected:", allRequiredInfoCollected);
+
   if (allRequiredInfoCollected) {
+    console.log("🎯 All info collected - generating recommendations");
     return generateRecommendations(movies, response);
   } else {
-    // תגובה מותאמת אישית למידע שנוסף - עם דיבאג
+    console.log("❓ Missing info - asking for more");
+    
+    // תגובה מותאמת אישית למידע שנוסף - רק אם באמת נוסף מידע חדש
     if (newInfoAdded && responseType && response === "") {
+      console.log("🎭 Creating personalized response for:", responseType);
       const personalizedResponse = createPersonalizedResponse(analysis, responseType);
-      console.log("🎭 תגובה מותאמת אישית:", personalizedResponse);
+      console.log("🎭 Personalized response created:", personalizedResponse);
       response += personalizedResponse + " ";
+    } else if (!newInfoAdded) {
+      console.log("ℹ️ No new info added - continuing to next question");
     }
     
     // הוספת שאלה על המידע החסר
     const missingInfoResponse = askForMissingInfo();
-    console.log("❓ שאלה על מידע חסר:", missingInfoResponse);
+    console.log("❓ Missing info response:", missingInfoResponse);
     
-    return response + missingInfoResponse;
+    const finalResponse = response + missingInfoResponse;
+    console.log("📝 Final response:", finalResponse);
+    
+    return finalResponse;
   }
 }
-
 // פונקציה לטיפול בבקשה ישירה להמלצות
 function handleRecommendationRequest(analysis, movies) {
   const allRequiredInfoCollected = ["genres", "age", "duration", "platforms"]
