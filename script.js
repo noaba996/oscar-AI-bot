@@ -856,8 +856,6 @@ function clearConversation(userMessage = null) {
     <div class="bot-message">${randomWelcome}</div>
   </div>`;
 }
-🤖 מעבד את הבחירה שלך...</div>
-  </div>`;
 
   try {
     const movies = await loadMoviesDatabase();
