@@ -1078,8 +1078,41 @@ async function generateSmartResponse(message, movies) {
 
     // הודעה מקוצרת ועניינית יותר
     if (newInfoAdded) {
-      response += "אין בעיה! ";
+      if (conversationMemory.lastMoods.length > 0) {
+        const mood = conversationMemory.lastMoods[0];
+        switch (mood) {
+          case "עצוב":
+            response += "🥺 מצטער לשמוע שאת מרגישה כך. בואי נרים את מצב הרוח עם סרט שיחמם את הלב! ";
+            break;
+          case "מרגש":
+            response += "💖 הולך להיות מרגש! בוא נבחר סרט שיגע בלב. ";
+            break;
+          case "שמח":
+            response += "🎉 איזה יופי! ממשיך בקצב החיובי! ";
+            break;
+          case "מפחיד":
+            response += "👻 נראה שאתה במצב רוח לאתגר... נבחר משהו מפחיד! ";
+            break;
+          case "נוסטלגי":
+            response += "🕰️ בוא נחזור לרגעים הקלאסיים של הקולנוע. ";
+            break;
+          case "רומנטי":
+            response += "💕 אחלה מצב רוח לערב רומנטי מול המסך! ";
+            break;
+          case "מרומם":
+            response += "✨ מחפש השראה? הנה אנחנו בדרך הנכונה. ";
+            break;
+          case "משעשע":
+            response += "😄 בוא נבחר משהו מצחיק בטירוף! ";
+            break;
+          default:
+            response += "אין בעיה! ";
+        }
+      } else {
+        response += "אין בעיה! ";
+      }
     }
+
 
     if (nextQuestion) {
       response += `${nextQuestion.question}`;
