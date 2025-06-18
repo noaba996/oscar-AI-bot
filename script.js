@@ -896,26 +896,6 @@ convo.innerHTML += `<div class='bubble bot'>
   <div class="bot-message">${randomWelcome}</div>
 </div>`;
 }
-
-  try {
-    const movies = await loadMoviesDatabase();
-    const smartResponse = await generateSmartResponse(choice, movies);
-
-    document.getElementById(`loading-${loadingId}`).remove();
-    convo.innerHTML += `<div class='bubble bot'>
-      <img src="OSCARPIC.jpeg" alt="Oscar" class="bot-avatar">
-      <div class="bot-message">${smartResponse}</div>
-    </div>`;
-
-  } catch (error) {
-    const loadingElement = document.getElementById(`loading-${loadingId}`);
-    if (loadingElement) loadingElement.remove();
-    
-    console.error("❌ שגיאה:", error);
-    showError(error);
-  }
-
-  convo.scrollTop = convo.scrollHeight;
 }
 
 // פונקציה ליצירת תשובה חכמה - עודכנה לעבוד עם AI
