@@ -249,10 +249,10 @@ async function analyzeTextWithAI(userMessage, conversationHistory = []) {
   try {
     console.log("🤖 שולח לניתוח ב-Gemini AI:", userMessage);
     
-    // פרומפט משופר שמבין הקשר ומונע חזרות
+    // פרומפט משופר עם דוגמאות ברורות יותר
     const prompt = `
 אתה עוזר חכם לבוט המלצות סרטים בעברית בשם "אוסקר". 
-אתה צריך להיות טבעי, חכם ולהבין הקשר של השיחה.
+תפקידך לנתח בדקדקנות מה המשתמש רוצה ולזהות את כל המידע הרלוונטי.
 
 היסטוריית השיחה הקודמת:
 ${conversationHistory.slice(-5).map(msg => `${msg.role}: ${msg.content}`).join('\n')}
@@ -265,21 +265,59 @@ ${conversationHistory.slice(-5).map(msg => `${msg.role}: ${msg.content}`).join('
 3. זהה מה המשתמש באמת רוצה - האם הוא מוסיף מידע חדש או מבקש המלצות
 4. אם המשתמש אומר "עוד" או "אחרים" - זה אומר שהוא רוצה המלצות נוספות עם אותם קריטריונים
 
+
+חשוב מאוד - זהה בחוכמה:
+
+1. **ז'אנרים** - כל דרך להזכיר ז'אנר:
+   - ישיר: "אקשן", "קומדיה", "דרמה"
+   - עקיף: "משהו מצחיק" = קומדיה, "משהו מפחיד" = אימה, "משהו רומנטי" = רומנטי
+   - תיאור: "סרט עם הרבה פעולה" = אקשן, "סרט שיגע לי ללב" = דרמה
+
+2. **מצב רוח** - רק אם המשתמש מתאר איך הוא מרגיש עכשיו:
+   - "אני עצוב", "אני בעצב", "רע לי" = עצוב
+   - "אני שמח", "מצב רוח טוב", "מעולה" = שמח
+   - "בא לי להתרגש", "רוצה לבכות" = מרגש
+   - לא לזהות כמצב רוח: "משהו עצוב" (זה ז'אנר), "סרט שמח" (זה לא מצב רוח)
+
+3. **גיל** - כל אזכור של גיל:
+   - "אני בן 25", "בת 15", "גיל 30"
+
+4. **פלטפורמות**:
+   - "יש לי נטפליקס", "יש יס", "יש הוט"
+   - "כן" (אם שאלתי על פלטפורמה) = כל הפלטפורמות שהזכרתי
+   - "לא" או "אין לי" = רשימה רקה
+
+5. **אורך סרט**:
+   - "קצר", "מהיר", "לא הרבה זמן" = קצר
+   - "ארוך", "יותר משעתיים" = ארוך
+   - "רגיל", "בינוני" = בינוני
+
+6. **פקודות מיוחדות**:
+   - "עוד", "אחרים", "נוספים" = requesting_more
+   - "תודה", "thanks" = תודה
+   - "ביי", "להתראות" = סיום
+
+דוגמאות לניתוח נכון:
+- "בא לי משהו מצחיק" → genres: ["קומדיה"], intentType: "giving_new_info"
+- "אני עצוב" → mood: "עצוב", isNewMoodMention: true
+- "אני בן 20 ובא לי אקשן" → ageRange: "17+", genres: ["אקשן"]
+- "יש לי נטפליקס" → platforms: ["נטפליקס"]
+- "עוד המלצות" → command: "אחרים", intentType: "requesting_more"
+
 אנא נתח את ההודעה וחלץ מידע בפורמט JSON הבא:
 {
-  "genres": [רשימת ז'אנרים שהמשתמש ציין עכשיו - רק אם הוא הזכיר אותם בהודעה הנוכחית],
-  "ageRange": "7+" | "13+" | "17+" | null (רק אם ציין גיל עכשיו),
-  "platforms": [רשימת פלטפורמות שהמשתמש ציין עכשיו],
-  "duration": "קצר" | "בינוני" | "ארוך" | null (רק אם ציין אורך עכשיו),
-  "mood": מצב רוח שהמשתמש הביע עכשיו - רק אם הוא באמת אמר איך הוא מרגיש עכשיו,
-  "isNewMoodMention": true/false - האם זו הפעם הראשונה שהוא מזכיר את מצב הרוח הזה,
+  "genres": [רק ז'אנרים שהמשתמש ציין בהודעה הנוכחית],
+  "ageRange": "7+" | "13+" | "17+" | null,
+  "platforms": [רשימת פלטפורמות או רשימה ריקה],
+  "duration": "קצר" | "בינוני" | "ארוך" | null,
+  "mood": מצב רוח רק אם המשתמש אמר איך הוא מרגיש,
+  "isNewMoodMention": true אם זו הפעם הראשונה שהוא מזכיר מצב רוח זה,
   "confidence": מספר בין 0-1,
-  "missingInfo": [מה עדיין חסר למען המלצות טובות],
-  "extractedInfo": "מה המשתמש אמר במילים שלך",
-  "command": "אחרים" | "איפוס" | "תודה" | "סיום" | null,
+  "missingInfo": [מה עדיין חסר],
+  "extractedInfo": "תקציר של מה שהבנת",
+  "command": "אחרים" | "תודה" | "סיום" | null,
   "intentType": "giving_new_info" | "asking_for_recommendations" | "requesting_more" | "casual_chat"
 }
-
 דוגמאות:
 - אם המשתמש אומר "אני אוהב אקשן" - זה giving_new_info
 - אם הוא אומר "תמליץ לי על סרט" - זה asking_for_recommendations  
@@ -292,6 +330,12 @@ ${conversationHistory.slice(-5).map(msg => `${msg.role}: ${msg.content}`).join('
 - פלטפורמות: נטפליקס, יס, הוט
 - אורך: קצר/מהיר/פחות מ... = קצר, בינוני/רגיל = בינוני, ארוך/יותר מ... = ארוך
 - מצבי רוח: שמח, עצוב, מרגש, רומנטי וכו' - רק אם הוא באמת מתאר איך הוא מרגיש
+
+כללי זהב:
+- אם המשתמש אומר "משהו מצחיק" - זה ז'אנר קומדיה, לא מצב רוח
+- אם המשתמש אומר "אני עצוב" - זה מצב רוח
+- אם המשתמש נותן מידע חדש - intentType: "giving_new_info"
+- תמיד תן ביטחון גבוה אם הזיהוי ברור
 
 השב רק בפורמט JSON, ללא הסבר נוסף.
 `;
@@ -319,7 +363,7 @@ ${conversationHistory.slice(-5).map(msg => `${msg.role}: ${msg.content}`).join('
     const data = await response.json();
     const aiResponse = data.candidates[0].content.parts[0].text;
     
-    console.log("🤖 תשובת AI גולמית:", aiResponse);
+console.log("🤖 תשובת AI גולמית:", aiResponse);
     
     try {
       const cleanResponse = aiResponse.replace(/```json|```/g, '').trim();
@@ -330,19 +374,19 @@ ${conversationHistory.slice(-5).map(msg => `${msg.role}: ${msg.content}`).join('
       
     } catch (parseError) {
       console.error("❌ שגיאה בפרסור תשובת AI:", parseError);
-      console.log("🔄 נופל חזרה לניתוח מקומי");
-      return fallbackAnalysis(userMessage);
+      console.log("🔄 נופל חזרה לניתוח מקומי משופר");
+      return enhancedFallbackAnalysis(userMessage);
     }
 
   } catch (error) {
     console.error("❌ שגיאה ב-Gemini AI:", error);
-    console.log("🔄 נופל חזרה לניתוח מקומי");
-    return fallbackAnalysis(userMessage);
+    console.log("🔄 נופל חזרה לניתוח מקומי משופר");
+    return enhancedFallbackAnalysis(userMessage);
   }
 }
 
-// פונקציית גיבוי לניתוח מקומי (הקוד המקורי) - עודכנה לתמיכה בשדות החדשים
-function fallbackAnalysis(text) {
+// פונקציית גיבוי משופרת שמבינה טוב יותר
+function enhancedFallbackAnalysis(text) {
   const lowerText = text.toLowerCase().trim();
   const analysis = {
     genres: [],
@@ -351,36 +395,63 @@ function fallbackAnalysis(text) {
     duration: null,
     mood: null,
     isNewMoodMention: false,
-    confidence: 0.7,
+    confidence: 0.8,
     missingInfo: [],
-    extractedInfo: "ניתוח מקומי של הטקסט",
+    extractedInfo: "ניתוח מקומי משופר",
     command: null,
     intentType: "giving_new_info"
   };
 
-  // זיהוי פקודות
-  const commands = {
-    "אחרים": ["אחרים", "נוספים", "עוד", "הבאים", "אחר"],
-    "איפוס": ["התחל שיחה חדשה", "אפס", "חדש", "התחל מחדש"],
-    "תודה": ["תודה", "תודה רבה", "תודות", "thanks", "thank you"],
-    "סיום": ["ביי", "להתראות", "עד הפעם הבאה", "bye", "goodbye"]
+  // זיהוי ז'אנרים - כולל דרכים עקיפות
+  const genrePatterns = {
+    "קומדיה": [
+      "קומדיה", "מצחיק", "comedy", "הומור", "צחוק", "כיפי", "קליל", 
+      "משהו מצחיק", "בא לי לצחוק", "רוצה משהו קליל", "סרט מבדר"
+    ],
+    "אקשן": [
+      "אקשן", "פעולה", "action", "קרב", "מרדף", 
+      "משהו עם פעולה", "הרבה אקשן", "סרט פעולה"
+    ],
+    "דרמה": [
+      "דרמה", "רגשי", "drama", "מרגש", "רציני", 
+      "משהו רגשי", "סרט שיגע ללב", "סרט עמוק"
+    ],
+    "רומנטי": [
+      "רומנטי", "אהבה", "romance", "זוגי", "רומנטיקה", 
+      "משהו רומנטי", "סרט אהבה", "משהו מתוק"
+    ],
+    "אימה": [
+      "אימה", "מפחיד", "horror", "מבעית", "מצמרר", 
+      "משהו מפחיד", "בא לי להפחד", "סרט אימה"
+    ],
+    "מתח": [
+      "מתח", "thriller", "מותחן", "ריגול", 
+      "משהו מותח", "סרט מתח"
+    ]
   };
 
-  for (const [command, words] of Object.entries(commands)) {
-    if (words.some(word => lowerText.includes(word))) {
-      analysis.command = command;
-      if (command === "אחרים") analysis.intentType = "requesting_more";
-      break;
+  // זיהוי ז'אנרים
+  for (const [genre, patterns] of Object.entries(genrePatterns)) {
+    if (patterns.some(pattern => lowerText.includes(pattern))) {
+      analysis.genres.push(genre);
     }
   }
 
-  // זיהוי ז'אנרים פשוט
-  const genreKeywords = {
-    "אקשן": ["אקשן", "פעולה", "action"],
-    "קומדיה": ["קומדיה", "מצחיק", "comedy"],
-    "דרמה": ["דרמה", "רגשי", "drama"],
-    "רומנטי": ["רומנטי", "אהבה", "romance"]
+// זיהוי מצב רוח - רק אם המשתמש מתאר איך הוא מרגיש
+  const moodPatterns = {
+    "עצוב": ["אני עצוב", "אני בעצב", "רע לי", "אני מרגיש רע", "מצב רוח רע"],
+    "שמח": ["אני שמח", "מצב רוח טוב", "אני מעולה", "אני מרגיש טוב", "אני בכיף"],
+    "מרגש": ["בא לי להתרגש", "רוצה לבכות", "אני רגשי היום"],
+    "רומנטי": ["אני רומנטי היום", "בא לי רומנטיקה"]
   };
+
+  for (const [mood, patterns] of Object.entries(moodPatterns)) {
+    if (patterns.some(pattern => lowerText.includes(pattern))) {
+      analysis.mood = mood;
+      analysis.isNewMoodMention = true;
+      break;
+    }
+  }
 
   for (const [genre, words] of Object.entries(genreKeywords)) {
     if (words.some(word => lowerText.includes(word))) {
@@ -397,7 +468,50 @@ function fallbackAnalysis(text) {
 
   return analysis;
 }
+ // זיהוי פלטפורמות
+  if (lowerText.includes("נטפליקס") || lowerText.includes("netflix")) {
+    analysis.platforms.push("נטפליקס");
+  }
+  if (lowerText.includes("יס") || lowerText.includes("yes")) {
+    analysis.platforms.push("יס");
+  }
+  if (lowerText.includes("הוט") || lowerText.includes("hot")) {
+    analysis.platforms.push("הוט");
+  }
 
+ // זיהוי פקודות
+  if (["עוד", "אחרים", "נוספים", "הבאים"].some(cmd => lowerText.includes(cmd))) {
+    analysis.command = "אחרים";
+    analysis.intentType = "requesting_more";
+  } else if (["תודה", "thanks"].some(cmd => lowerText.includes(cmd))) {
+    analysis.command = "תודה";
+  } else if (["ביי", "להתראות", "bye"].some(cmd => lowerText.includes(cmd))) {
+    analysis.command = "סיום";
+  }
+
+  // זיהוי גיל
+  const ageMatch = lowerText.match(/(?:בן|בת|גיל|אני)\s*(\d+)/);
+  if (ageMatch) {
+    const age = parseInt(ageMatch[1]);
+    if (age >= 7 && age <= 12) analysis.ageRange = "7+";
+    else if (age >= 13 && age <= 16) analysis.ageRange = "13+";
+    else if (age >= 17) analysis.ageRange = "17+";
+  }
+
+  // זיהוי אורך
+  if (["קצר", "מהיר", "לא הרבה זמן"].some(dur => lowerText.includes(dur))) {
+    analysis.duration = "קצר";
+  } else if (["ארוך", "יותר משעתיים"].some(dur => lowerText.includes(dur))) {
+    analysis.duration = "ארוך";
+  } else if (["בינוני", "רגיל"].some(dur => lowerText.includes(dur))) {
+    analysis.duration = "בינוני";
+  }
+
+  analysis.extractedInfo = `זוהו: ${analysis.genres.length} ז'אנרים, ${analysis.mood ? 'מצב רוח' : 'ללא מצב רוח'}, ${analysis.platforms.length} פלטפורמות`;
+
+  return analysis;
+}
+----
 // פונקציה לניתוח טקסט - עכשיו משתמשת ב-AI
 async function analyzeText(text) {
   console.log("🔍 מתחיל ניתוח טקסט:", text);
@@ -701,6 +815,7 @@ function handleNewInfo(analysis, movies) {
     conversationMemory.lastGenres = analysis.genres;
     conversationMemory.collectedInfo.genres = true;
     newInfoAdded = true;
+    console.log("✅ זוהו ז'אנרים:", analysis.genres);
   }
 
   // תגובה למצב רוח רק בפעם הראשונה!
@@ -722,9 +837,6 @@ function handleNewInfo(analysis, movies) {
         break;
       case "רומנטי":
         response += "💕 מושלם לערב רומנטי! ";
-        break;
-      case "מפחיד":
-        response += "👻 מוכן לקצת אתגר? בוא נמצא משהו מרתק! ";
         break;
     }
   }
@@ -758,7 +870,10 @@ function handleNewInfo(analysis, movies) {
   if (allRequiredInfoCollected) {
     return generateRecommendations(movies, response);
   } else {
-    // שאל על המידע החסר
+    // שאל על המידע החסר - אבל תן מענה חיובי קודם
+    if (newInfoAdded && response === "") {
+      response += "מעולה! ";
+    }
     return response + askForMissingInfo();
   }
 }
