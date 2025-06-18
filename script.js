@@ -1078,7 +1078,7 @@ async function generateSmartResponse(message, movies) {
 
     // הודעה מקוצרת ועניינית יותר
     if (newInfoAdded) {
-      response += "בסדר! ";
+      response += "אין בעיה! ";
     }
 
     if (nextQuestion) {
