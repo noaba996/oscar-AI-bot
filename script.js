@@ -244,7 +244,7 @@ const interactiveQuestions = [
   }
 ];
 
-// 🤖 פונקציה לניתוח טקסט באמצעות Gemini AI - מעודכנת וחכמה יותר
+// 🤖 פונקציה לניתוח טקסט באמצעות Gemini AI - מתוקנת להבנה טובה יותר
 async function analyzeTextWithAI(userMessage, conversationHistory = []) {
   try {
     console.log("🤖 שולח לניתוח ב-Gemini AI:", userMessage);
@@ -258,13 +258,6 @@ async function analyzeTextWithAI(userMessage, conversationHistory = []) {
 ${conversationHistory.slice(-5).map(msg => `${msg.role}: ${msg.content}`).join('\n')}
 
 הודעה נוכחית של המשתמש: "${userMessage}"
-
-הוראות חשובות:
-1. אל תחזור על אותן תגובות - אם כבר דיברנו על מצב רוח, אל תזכיר את זה שוב
-2. תן תשובות טבעיות ומותאמות להקשר הספציפי
-3. זהה מה המשתמש באמת רוצה - האם הוא מוסיף מידע חדש או מבקש המלצות
-4. אם המשתמש אומר "עוד" או "אחרים" - זה אומר שהוא רוצה המלצות נוספות עם אותם קריטריונים
-
 
 חשוב מאוד - זהה בחוכמה:
 
@@ -318,18 +311,6 @@ ${conversationHistory.slice(-5).map(msg => `${msg.role}: ${msg.content}`).join('
   "command": "אחרים" | "תודה" | "סיום" | null,
   "intentType": "giving_new_info" | "asking_for_recommendations" | "requesting_more" | "casual_chat"
 }
-דוגמאות:
-- אם המשתמש אומר "אני אוהב אקשן" - זה giving_new_info
-- אם הוא אומר "תמליץ לי על סרט" - זה asking_for_recommendations  
-- אם הוא אומר "עוד" או "אחרים" - זה requesting_more
-- אם הוא אומר "היי איך שלומך" - זה casual_chat
-
-זהה בחוכמה:
-- ז'אנרים: אקשן, קומדיה, דרמה, רומנטי, אימה, מתח, מדע בדיוני, פנטזיה, אנימציה, תיעודי, ביוגרפיה, היסטוריה וכו'
-- גילאים: כל מספר או תיאור גיל
-- פלטפורמות: נטפליקס, יס, הוט
-- אורך: קצר/מהיר/פחות מ... = קצר, בינוני/רגיל = בינוני, ארוך/יותר מ... = ארוך
-- מצבי רוח: שמח, עצוב, מרגש, רומנטי וכו' - רק אם הוא באמת מתאר איך הוא מרגיש
 
 כללי זהב:
 - אם המשתמש אומר "משהו מצחיק" - זה ז'אנר קומדיה, לא מצב רוח
@@ -337,7 +318,7 @@ ${conversationHistory.slice(-5).map(msg => `${msg.role}: ${msg.content}`).join('
 - אם המשתמש נותן מידע חדש - intentType: "giving_new_info"
 - תמיד תן ביטחון גבוה אם הזיהוי ברור
 
-השב רק בפורמט JSON, ללא הסבר נוסף.
+השב רק בפורמט JSON ללא הסבר נוסף.
 `;
 
     const requestBody = {
@@ -363,7 +344,7 @@ ${conversationHistory.slice(-5).map(msg => `${msg.role}: ${msg.content}`).join('
     const data = await response.json();
     const aiResponse = data.candidates[0].content.parts[0].text;
     
-console.log("🤖 תשובת AI גולמית:", aiResponse);
+    console.log("🤖 תשובת AI גולמית:", aiResponse);
     
     try {
       const cleanResponse = aiResponse.replace(/```json|```/g, '').trim();
@@ -437,7 +418,7 @@ function enhancedFallbackAnalysis(text) {
     }
   }
 
-// זיהוי מצב רוח - רק אם המשתמש מתאר איך הוא מרגיש
+  // זיהוי מצב רוח - רק אם המשתמש מתאר איך הוא מרגיש
   const moodPatterns = {
     "עצוב": ["אני עצוב", "אני בעצב", "רע לי", "אני מרגיש רע", "מצב רוח רע"],
     "שמח": ["אני שמח", "מצב רוח טוב", "אני מעולה", "אני מרגיש טוב", "אני בכיף"],
@@ -453,22 +434,7 @@ function enhancedFallbackAnalysis(text) {
     }
   }
 
-  for (const [genre, words] of Object.entries(genreKeywords)) {
-    if (words.some(word => lowerText.includes(word))) {
-      analysis.genres.push(genre);
-    }
-  }
-
-  // זיהוי כוונה
-  if (lowerText.includes("המליץ") || lowerText.includes("תן לי") || lowerText.includes("רוצה סרט")) {
-    analysis.intentType = "asking_for_recommendations";
-  } else if (lowerText.includes("היי") || lowerText.includes("שלום")) {
-    analysis.intentType = "casual_chat";
-  }
-
-  return analysis;
-}
- // זיהוי פלטפורמות
+  // זיהוי פלטפורמות
   if (lowerText.includes("נטפליקס") || lowerText.includes("netflix")) {
     analysis.platforms.push("נטפליקס");
   }
@@ -479,7 +445,7 @@ function enhancedFallbackAnalysis(text) {
     analysis.platforms.push("הוט");
   }
 
- // זיהוי פקודות
+  // זיהוי פקודות
   if (["עוד", "אחרים", "נוספים", "הבאים"].some(cmd => lowerText.includes(cmd))) {
     analysis.command = "אחרים";
     analysis.intentType = "requesting_more";
@@ -511,7 +477,7 @@ function enhancedFallbackAnalysis(text) {
 
   return analysis;
 }
-----
+
 // פונקציה לניתוח טקסט - עכשיו משתמשת ב-AI
 async function analyzeText(text) {
   console.log("🔍 מתחיל ניתוח טקסט:", text);
@@ -805,7 +771,7 @@ function handleMoreRecommendations(movies) {
   }
 }
 
-// פונקציה לטיפול במידע חדש מהמשתמש
+// פונקציה לטיפול במידע חדש מהמשתמש - מתוקנת!
 function handleNewInfo(analysis, movies) {
   let response = "";
   let newInfoAdded = false;
